@@ -205,7 +205,7 @@ typedef enum binary_type_s
   binary_type_uimage_recovery,
   binary_type_system,
 
-  binary_type_none,  // These errors cause retransmission from the PC
+  binary_type_none,  // These errors cause retransmission from the PC
 
   binary_type_end = 0xFF
 } binary_type_t;

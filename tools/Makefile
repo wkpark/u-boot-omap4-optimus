@@ -87,7 +87,7 @@ HOST_ENVIRO_CFLAGS =
 else
 HOST_CFLAGS = -Wall -pedantic
 HOST_LDFLAGS =
-HOST_ENVIRO_CFLAGS =
+HOST_ENVIRO_CFLAGS = -I/usr/include
 endif
 endif
 

@@ -57,7 +57,7 @@ COBJS	= main.o ACEX1K.o altera.o bedbug.o circbuf.o \
 OBJS	= $(AOBJS) $(COBJS)
 
 # LGE_UPDATE_S	ed.lim@lge.com	2011/08/30	for FOTA 
-include ../../../../system/fota/build/boot/uboot_fota.mk
+#include ../../../../system/fota/build/boot/uboot_fota.mk
 # LGE_UPDATE_E	ed.lim@lge.com	2011/08/30 
 
 CPPFLAGS += -I..

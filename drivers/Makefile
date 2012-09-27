@@ -67,6 +67,9 @@ endif
 ifeq ($(BOARD),cx2)
 OBJS	+= gpio_i2c.o max17043.o
 endif
+ifeq ($(BOARD),cosmopolitan)
+OBJS	+= gpio_i2c.o max17043.o
+endif
 
 all:	$(LIB)
 

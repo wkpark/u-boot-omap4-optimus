@@ -1,4 +1,5 @@
-#include <common.h>#if defined(CONFIG_BOOT_DEVICE_EMMC)
+#include <common.h>
+#if defined(CONFIG_BOOT_DEVICE_EMMC)
 //#if (CONFIG_COMMANDS & CFG_CMD_ONENAND)
 #include <asm/types.h>
 #include <linux/mtd/onenand.h>
@@ -10,10 +11,18 @@
 #include <asm/arch/bits.h>
 #include <asm/io.h>
 #include <asm/arch/gpio.h>
-#include <mmc.h>#include <lge_nvdata_emmc.h>#include <twl6030.h>#include <asm/arch-omap4/cpu.h>
+#include <mmc.h>
+
+#include <lge_nvdata_emmc.h>
+
+
+#include <twl6030.h>
+
+#include <asm/arch-omap4/cpu.h>
 #include "../cpu/omap4/mmc_protocol.h"
 
-#define mdelay(msec) {int i = msec; while (--i >= 0) udelay(1000);}#ifndef FALSE
+#define mdelay(msec) {int i = msec; while (--i >= 0) udelay(1000);}
+#ifndef FALSE
 #define FALSE 0
 #endif
 
@@ -29,19 +38,34 @@
 #define IFX_PWRON 27
 #define USIF1_SW 182
 
-#define SIZEOFREQFLASHID		0xAC
-char trap_flag;
-#define MAX_AT_BUFFER_SIZE		80unsigned char 	test_Tbuf[3]={0,};
-unsigned char	test_Rbuf[0x17]={0,};unsigned char 	test_Tbuf2[80]={0,};unsigned char	test_Rbuf2[80]={0,};unsigned char hdlc_tx_buf [MAX_PACKET_SIZE]={0,}; 	/* tx buffer */
+#define SIZEOFREQFLASHID		0xAC
 
-volatile unsigned char TxBuf[MAX_IFX_PACKET_SIZE + 4]={0,};volatile unsigned char HeaderBuf[IFX_PACKET_HEADER_SIZE]={0,};
+char trap_flag;
+
+
+#define MAX_AT_BUFFER_SIZE		80
+unsigned char 	test_Tbuf[3]={0,};
+unsigned char	test_Rbuf[0x17]={0,};
+unsigned char 	test_Tbuf2[80]={0,};
+unsigned char	test_Rbuf2[80]={0,};
+
+unsigned char hdlc_tx_buf [MAX_PACKET_SIZE]={0,}; 	/* tx buffer */
+
+volatile unsigned char TxBuf[MAX_IFX_PACKET_SIZE + 4]={0,};
+volatile unsigned char HeaderBuf[IFX_PACKET_HEADER_SIZE]={0,};
+
 unsigned int  g_onenand_address;	
 
 unsigned int g_onenand_block_offset;
 unsigned int onenand_data_offset;				/* offset of current onenand_data */
-unsigned int g_onenand_address_size;volatile unsigned int  MmcSecStartAddr;	
-unsigned int MmcSecLength;unsigned int CurrentFileIndex = 0;
-unsigned char					IsIFXInit = 0; // Factory Info. XML_LOG
+unsigned int g_onenand_address_size;
+volatile unsigned int  MmcSecStartAddr;	
+
+unsigned int MmcSecLength;
+unsigned int CurrentFileIndex = 0;
+
+unsigned char					IsIFXInit = 0; // Factory Info. XML_LOG
+
 extern unsigned int usbtty_bulk_fifo_index;
 extern u8 *usbtty_bulk_fifo;
 
@@ -51,9 +75,16 @@ extern int usbtty_init(void);
 
 extern int mmc_init(int slot);
 extern int mmc_write(int mmc_cont, unsigned char *src, unsigned long dst, int size);
-extern void ifx_start_low();extern void ifx_uart_sw_ctrl(int);extern void ifx_dl_reset();
 
-static int 					hdlc_send_packet (unsigned char *pBuf, unsigned int wLen);static int 					nonhdlc_send_packet (unsigned char *pCmdBuf, unsigned int wLen, unsigned char *pDataBuf, unsigned int dLen);static int 					send_buffer (unsigned char *buf, int len);
+extern void ifx_start_low();
+extern void ifx_uart_sw_ctrl(int);
+extern void ifx_dl_reset();
+
+
+static int 					hdlc_send_packet (unsigned char *pBuf, unsigned int wLen);
+
+static int 					nonhdlc_send_packet (unsigned char *pCmdBuf, unsigned int wLen, unsigned char *pDataBuf, unsigned int dLen);
+static int 					send_buffer (unsigned char *buf, int len);
 static unsigned int 		parsingCmd(byte *pBuf);
 
 
@@ -112,9 +143,12 @@ typedef enum package_type_s
 unsigned char*		pTmpBuf = NULL;
 extern int		DownloadValid;
 
-// WEB DOWNLOAD [START]	static char web_download_flag2=0x00; 
+// WEB DOWNLOAD [START]
+	static char web_download_flag2=0x00; 
 	int web_download_mode=0; 
-// WEB DOWNLOAD [END]void Main_Event_Process(void)
+// WEB DOWNLOAD [END]
+
+void Main_Event_Process(void)
 {
 	byte				pCmd_buf[100]; //= (byte*)0x80500000;
 	struct prot_cmd_t*	pRxPack;
@@ -179,8 +213,351 @@ extern int		DownloadValid;
 
 			break;
 		}	
-	case Req_factory_info_t_2:		{			unsigned char * pFactoryBuf = (unsigned char *) malloc(MAX_AT_BUFFER_SIZE);			/*			===>  PID, Model name is saved like below in emmc (index 16)			------------------------------------------------------------------------------------			| 		PID(32 byte) |   4 byte (model name size) |3 or 4 or 5 (we can't know but... don't care)  |			------------------------------------------------------------------------------------			*/			int TestNum = 0;			int loopIdx = 0, Num = 0, Idx = 0;			unsigned char	ReadCh, ReadCh2;			byte bFind = 0;						struct prot_rsp_PID_t_2 rsp;
-			memset((void*)&rsp, 0x00, sizeof(struct prot_rsp_PID_t_2));			usbtty_bulk_fifo_index = 0; 			if (IsIFXInit == 0)			{				//extern  void hub_ifx_uart_sw_ctrl(int sel);				// 1. UART switch change to infineon				 ifx_start_low();;				IsIFXInit = 1;			}   			mdelay(10000);			  ifx_uart_sw_ctrl(0);			//strcpy((char*)test_Tbuf2, "AT%IMEI");			//test_Tbuf2[strlen("AT%IMEI")] = 0x0D;			strcpy((char*)test_Tbuf2, "AT%INFO");			test_Tbuf2[strlen("AT%INFO")] = 0x0D;			// Read INFO			putsB ((unsigned char*)test_Tbuf2, 8, 100000);			TestNum = 0;			while (1)			{				bFind = 0;				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));				mdelay(200);				Num = 0;				ReadCh2 = 0x00;				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));				while(1)				{					if (getcB (100000, (char*)&ReadCh) == -1)						break;													printf("######## AT Test: %x\n",ReadCh); 					test_Rbuf2[Num++] = ReadCh;				}				printf("============= PASS ================\n");								for (loopIdx = 0; loopIdx < Num; loopIdx++)				{					if (test_Rbuf2[loopIdx]==0x41 && test_Rbuf2[loopIdx+1]==0x54 && test_Rbuf2[loopIdx+2] == 0x25 && test_Rbuf2[loopIdx+3] == 0x49)										{												printf("AT Test1:%x, %x, %x, %x",test_Rbuf2[8], test_Rbuf2[9], test_Rbuf2[10], test_Rbuf2[11]); 						printf("AT Test2:%x, %x, %x, %x",test_Rbuf2[12], test_Rbuf2[13], test_Rbuf2[14], test_Rbuf2[15]);							printf("AT Test3:%x, %x, %x, %x\n",test_Rbuf2[16], test_Rbuf2[17], test_Rbuf2[18], test_Rbuf2[19]);												bFind = 1;						break;					}				}				printf("Fine %x\n", bFind);					if (bFind == 0)				{					mdelay(10);					putsB ((unsigned char*)test_Tbuf2, 8, 100000);									TestNum++; 					if (TestNum > 30)					{						//FastbootStatus("fail");						/*						memset((void*)&rsp, 0x00, sizeof(struct prot_rsp_PID_t));						rsp.type = Rsp_Ack;						hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t)); 										*/						break;					}														continue;				}				break;			}							if (TestNum > 10)			{				int ModelNameSize = 0;				printf("###### Can't find PID\n");//				read_PID_from_emmc(pFactoryBuf);				int char_num = 0 ;				while(char_num < 32 )				{					lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_PID_DETECT_OFFSET+(char_num*2),pFactoryBuf+char_num,1);					char_num++;				}				printf(" \n \n \n \n mmc read  PID = %s \n\n\n\n",pFactoryBuf );								memcpy(rsp.phPID, pFactoryBuf, 32);				ModelNameSize = *(int*)(pFactoryBuf + 32);				memcpy(rsp.phSWV, pFactoryBuf + 32 + 4, ModelNameSize);				printf("###### ModelName size:%d\n", ModelNameSize);								rsp.type = Rsp_Ack;				hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t_2)); 									free(pFactoryBuf);				break;			}			else			{				int char_num = 0 ;				printf("###### find PID\n");				//memcpy(rsp.phIMEI, (byte*)(test_Rbuf2 + sizeof("AT%IMEI") + 1), 17); // sizeof("AT%IMEI") => 9bytes				memcpy(rsp.phPID, (byte*)(test_Rbuf2 + loopIdx + strlen("AT%INFO") + 4), 32); // sizeof("AT%IMEI") => 9bytes				memcpy(pFactoryBuf, (byte*)(test_Rbuf2 + loopIdx + strlen("AT%INFO") + 4), 32);				printf(" \n \n \n \n PID = %s \n\n\n\n",pFactoryBuf );				while(char_num < 32 )				{					lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_PID_DETECT_OFFSET+(char_num*2),rsp.phPID+char_num,1);					char_num++;				}			}			strcpy((char*)test_Tbuf2, "AT%SWV");			test_Tbuf2[strlen("AT%SWV")] = 0x0D;			// Read SWV			putsB ((unsigned char*)test_Tbuf2, 7, 100000);			TestNum = 0;			while (1)			{				bFind = 0;				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));				mdelay(200);				Num = 0;				ReadCh2 = 0x00;				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));				while(1)				{					if (getcB (100000, (char*)&ReadCh) == -1)						break;													printf("######## AT Test: %x\n",ReadCh); 					test_Rbuf2[Num++] = ReadCh;				}				printf("============= PASS ================\n");								for (loopIdx = 0; loopIdx < Num; loopIdx++)				{					if (test_Rbuf2[loopIdx]==0x41 && test_Rbuf2[loopIdx+1]==0x54 && test_Rbuf2[loopIdx+2] == 0x25 && test_Rbuf2[loopIdx+3] == 0x53)										{												printf("AT Test1:%x, %x, %x, %x",test_Rbuf2[8], test_Rbuf2[9], test_Rbuf2[10], test_Rbuf2[11]); 						printf("AT Test2:%x, %x, %x, %x",test_Rbuf2[12], test_Rbuf2[13], test_Rbuf2[14], test_Rbuf2[15]);												bFind = 1;						break;					}				}				printf("Fine %x\n", bFind);					if (bFind == 0)				{					mdelay(10);					putsB ((unsigned char*)test_Tbuf2, 8, 100000);									TestNum++; 					if (TestNum > 10)					{						break;					}										continue;				}				break;			}			if (TestNum > 10)			{				int ModelNameSize = 0;				printf("###### Can't find SWV\n");				memcpy(rsp.phPID, pFactoryBuf, 32);				ModelNameSize = *(int*)(pFactoryBuf + 32);				memcpy(rsp.phSWV, pFactoryBuf + 32 + 4, ModelNameSize);				printf("###### ModelName size:%d\n", ModelNameSize);								rsp.type = Rsp_Ack;				hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t_2)); 													free(pFactoryBuf);					break;			}			TestNum = loopIdx;			while(1)			{				if (test_Rbuf2[TestNum] == 0x2d)				{					break;				}				printf("@@@@@@@@@ TestNum:%d: %x\n", TestNum, test_Rbuf2[TestNum]);				TestNum++;				if (TestNum > 30)				{					printf("We can't find\n");					break;				}			}						memcpy(rsp.phSWV, (byte*)(test_Rbuf2 + loopIdx + strlen("AT%SWV") + 4), TestNum - loopIdx - strlen("AT%SWV") - 4); // sizeof("AT%IMEI") => 9bytes			printf(" \n \n \n \n PID = %s \n\n\n\n\n ", rsp.phSWV);						rsp.phSWV[TestNum - loopIdx + - strlen("AT%SWV") - 4] = NULL;			*(int*)((char*)pFactoryBuf + 32) = (int)(TestNum - loopIdx - strlen("AT%SWV") - 4);			memcpy((void*)((char*)pFactoryBuf + 32 + 4), (void*)rsp.phSWV, TestNum - loopIdx - strlen("AT%SWV") - 4 + 1);			rsp.type = Rsp_Ack;			hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t_2)); 							free(pFactoryBuf);			break;		}		case Req_factory_info_t:		{			int TestNum = 0;			int loopIdx = 0, Num = 0;			unsigned char	ReadCh, ReadCh2;			printf("====Req_factory_info_t======\n"); //jb.chae						struct prot_rsp_PID_t rsp;			usbtty_bulk_fifo_index = 0; 			if (IsIFXInit == 0)			{                          ifx_start_low();				IsIFXInit = 1;			}			udelay(10000);	                           ifx_uart_sw_ctrl(0);			mdelay(5000);  			strcpy((char*)test_Tbuf2, "AT%IMEI");			test_Tbuf2[strlen("AT%IMEI")] = 0x0D;						printf("============== woonrae woonrae =============\n");			putsB ((unsigned char*)test_Tbuf2, 8, 1000000);			TestNum = 0;			while (1)			{				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));				mdelay(200);				Num = 0;				ReadCh2 = 0x00;				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));				for (loopIdx = 0; loopIdx < 60; loopIdx++)  //40->60				{					if (getcB (1000000, (char*)&ReadCh) == -1)						break;					printf("%x \n", ReadCh);					if (ReadCh == 0x4B && ReadCh2 == 0x4F)  // 0x4B = K, 0x4F = O					{						test_Rbuf2[Num++] = ReadCh;						getcB (1000000, (char*)&ReadCh);						getcB (1000000, (char*)&ReadCh);							break;					}					else						ReadCh2 = ReadCh;								test_Rbuf2[Num++] = ReadCh;				}				printf("============= PASS ================\n");				if (test_Rbuf2[8]==0x0d && test_Rbuf2[9]==0x0a && test_Rbuf2[10] == 0x02) //AT%I					{										printf("AT Test1:%x, %x, %x, %x\n",test_Rbuf2[8], test_Rbuf2[9], test_Rbuf2[10], test_Rbuf2[11]); 					printf("AT Test2:%x, %x, %x, %x\n",test_Rbuf2[12], test_Rbuf2[13], test_Rbuf2[14], test_Rbuf2[15]);						printf("AT Test3:%x, %x, %x, %x\n",test_Rbuf2[16], test_Rbuf2[17], test_Rbuf2[18], test_Rbuf2[19]);											break;				}			  				mdelay(10);				putsB ((unsigned char*)test_Tbuf2, 8, 100000);								TestNum++; 						if (TestNum > 10)				break;						}			if (TestNum  > 10 )			{					//FastbootStatus("fail");					memset((void*)&rsp, 0x00, sizeof(struct prot_rsp_PID_t));					rsp.type = Rsp_Ack;					hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t)); 									break;			}			memcpy(rsp.phIMEI, (byte*)(test_Rbuf2 + sizeof("AT%IMEI") +3), 17);  			memset(test_Tbuf2, 0x00, sizeof(test_Tbuf2)); 			memset(test_Rbuf2, 0x00, sizeof(test_Rbuf2)); 			memcpy(rsp.phPID, (byte*)(test_Rbuf2), 64); 			rsp.type = Rsp_Ack;			hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t)); 							break;		}
+	case Req_factory_info_t_2:
+		{
+			unsigned char * pFactoryBuf = (unsigned char *) malloc(MAX_AT_BUFFER_SIZE);
+			/*
+			===>  PID, Model name is saved like below in emmc (index 16)
+			------------------------------------------------------------------------------------
+			| 		PID(32 byte) |   4 byte (model name size) |3 or 4 or 5 (we can't know but... don't care)  |
+			------------------------------------------------------------------------------------
+			*/
+			int TestNum = 0;
+			int loopIdx = 0, Num = 0, Idx = 0;
+			unsigned char	ReadCh, ReadCh2;
+			byte bFind = 0;
+			
+			struct prot_rsp_PID_t_2 rsp;
+
+			memset((void*)&rsp, 0x00, sizeof(struct prot_rsp_PID_t_2));
+			usbtty_bulk_fifo_index = 0; 
+			if (IsIFXInit == 0)
+			{
+				//extern  void hub_ifx_uart_sw_ctrl(int sel);
+				// 1. UART switch change to infineon
+				 ifx_start_low();;
+
+				IsIFXInit = 1;
+			}   
+
+			mdelay(10000);
+
+			  ifx_uart_sw_ctrl(0);
+			//strcpy((char*)test_Tbuf2, "AT%IMEI");
+			//test_Tbuf2[strlen("AT%IMEI")] = 0x0D;
+			strcpy((char*)test_Tbuf2, "AT%INFO");
+			test_Tbuf2[strlen("AT%INFO")] = 0x0D;
+
+			// Read INFO
+			putsB ((unsigned char*)test_Tbuf2, 8, 100000);
+			TestNum = 0;
+			while (1)
+			{
+				bFind = 0;
+				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));
+				mdelay(200);
+
+				Num = 0;
+				ReadCh2 = 0x00;
+				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));
+				while(1)
+				{
+					if (getcB (100000, (char*)&ReadCh) == -1)
+						break;			
+					
+					printf("######## AT Test: %x\n",ReadCh); 
+					test_Rbuf2[Num++] = ReadCh;
+				}
+				printf("============= PASS ================\n");
+				
+				for (loopIdx = 0; loopIdx < Num; loopIdx++)
+				{
+					if (test_Rbuf2[loopIdx]==0x41 && test_Rbuf2[loopIdx+1]==0x54 && test_Rbuf2[loopIdx+2] == 0x25 && test_Rbuf2[loopIdx+3] == 0x49)					
+					{						
+						printf("AT Test1:%x, %x, %x, %x",test_Rbuf2[8], test_Rbuf2[9], test_Rbuf2[10], test_Rbuf2[11]); 
+						printf("AT Test2:%x, %x, %x, %x",test_Rbuf2[12], test_Rbuf2[13], test_Rbuf2[14], test_Rbuf2[15]);	
+						printf("AT Test3:%x, %x, %x, %x\n",test_Rbuf2[16], test_Rbuf2[17], test_Rbuf2[18], test_Rbuf2[19]);	
+					
+						bFind = 1;
+						break;
+					}
+				}
+
+				printf("Fine %x\n", bFind);	
+
+				if (bFind == 0)
+				{
+					mdelay(10);
+					putsB ((unsigned char*)test_Tbuf2, 8, 100000);				
+					TestNum++; 
+
+					if (TestNum > 30)
+					{
+						//FastbootStatus("fail");
+						/*
+						memset((void*)&rsp, 0x00, sizeof(struct prot_rsp_PID_t));
+						rsp.type = Rsp_Ack;
+						hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t)); 				
+						*/
+						break;
+					}	
+								
+					continue;
+				}
+
+				break;
+			}
+				
+			if (TestNum > 10)
+			{
+				int ModelNameSize = 0;
+
+				printf("###### Can't find PID\n");
+//				read_PID_from_emmc(pFactoryBuf);
+
+				int char_num = 0 ;
+
+				while(char_num < 32 )
+				{
+					lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_PID_DETECT_OFFSET+(char_num*2),pFactoryBuf+char_num,1);
+					char_num++;
+				}
+
+				printf(" \n \n \n \n mmc read  PID = %s \n\n\n\n",pFactoryBuf );
+				
+				memcpy(rsp.phPID, pFactoryBuf, 32);
+				ModelNameSize = *(int*)(pFactoryBuf + 32);
+				memcpy(rsp.phSWV, pFactoryBuf + 32 + 4, ModelNameSize);
+				printf("###### ModelName size:%d\n", ModelNameSize);
+				
+				rsp.type = Rsp_Ack;
+				hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t_2)); 					
+
+				free(pFactoryBuf);
+				break;
+			}
+			else
+			{
+				int char_num = 0 ;
+				printf("###### find PID\n");
+				//memcpy(rsp.phIMEI, (byte*)(test_Rbuf2 + sizeof("AT%IMEI") + 1), 17); // sizeof("AT%IMEI") => 9bytes
+				memcpy(rsp.phPID, (byte*)(test_Rbuf2 + loopIdx + strlen("AT%INFO") + 4), 32); // sizeof("AT%IMEI") => 9bytes
+				memcpy(pFactoryBuf, (byte*)(test_Rbuf2 + loopIdx + strlen("AT%INFO") + 4), 32);
+				printf(" \n \n \n \n PID = %s \n\n\n\n",pFactoryBuf );
+
+
+				while(char_num < 32 )
+				{
+					lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_PID_DETECT_OFFSET+(char_num*2),rsp.phPID+char_num,1);
+					char_num++;
+				}
+
+			}
+
+
+			strcpy((char*)test_Tbuf2, "AT%SWV");
+			test_Tbuf2[strlen("AT%SWV")] = 0x0D;
+
+			// Read SWV
+			putsB ((unsigned char*)test_Tbuf2, 7, 100000);
+			TestNum = 0;
+			while (1)
+			{
+
+				bFind = 0;
+				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));
+				mdelay(200);
+
+				Num = 0;
+				ReadCh2 = 0x00;
+				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));
+				while(1)
+				{
+					if (getcB (100000, (char*)&ReadCh) == -1)
+						break;			
+					
+					printf("######## AT Test: %x\n",ReadCh); 
+					test_Rbuf2[Num++] = ReadCh;
+				}
+				printf("============= PASS ================\n");
+				
+				for (loopIdx = 0; loopIdx < Num; loopIdx++)
+				{
+					if (test_Rbuf2[loopIdx]==0x41 && test_Rbuf2[loopIdx+1]==0x54 && test_Rbuf2[loopIdx+2] == 0x25 && test_Rbuf2[loopIdx+3] == 0x53)					
+					{						
+						printf("AT Test1:%x, %x, %x, %x",test_Rbuf2[8], test_Rbuf2[9], test_Rbuf2[10], test_Rbuf2[11]); 
+						printf("AT Test2:%x, %x, %x, %x",test_Rbuf2[12], test_Rbuf2[13], test_Rbuf2[14], test_Rbuf2[15]);	
+					
+						bFind = 1;
+						break;
+					}
+				}
+
+				printf("Fine %x\n", bFind);	
+
+				if (bFind == 0)
+				{
+					mdelay(10);
+					putsB ((unsigned char*)test_Tbuf2, 8, 100000);				
+					TestNum++; 
+
+					if (TestNum > 10)
+					{
+						break;
+					}					
+					continue;
+				}
+
+				break;
+			}
+
+			if (TestNum > 10)
+			{
+				int ModelNameSize = 0;
+
+				printf("###### Can't find SWV\n");
+				memcpy(rsp.phPID, pFactoryBuf, 32);
+				ModelNameSize = *(int*)(pFactoryBuf + 32);
+				memcpy(rsp.phSWV, pFactoryBuf + 32 + 4, ModelNameSize);
+				printf("###### ModelName size:%d\n", ModelNameSize);
+				
+				rsp.type = Rsp_Ack;
+				hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t_2)); 					
+				
+				free(pFactoryBuf);	
+				break;
+			}
+
+			TestNum = loopIdx;
+			while(1)
+			{
+				if (test_Rbuf2[TestNum] == 0x2d)
+				{
+					break;
+				}
+				printf("@@@@@@@@@ TestNum:%d: %x\n", TestNum, test_Rbuf2[TestNum]);
+				TestNum++;
+
+				if (TestNum > 30)
+				{
+					printf("We can't find\n");
+					break;
+				}
+			}
+			
+			memcpy(rsp.phSWV, (byte*)(test_Rbuf2 + loopIdx + strlen("AT%SWV") + 4), TestNum - loopIdx - strlen("AT%SWV") - 4); // sizeof("AT%IMEI") => 9bytes
+
+			printf(" \n \n \n \n PID = %s \n\n\n\n\n ", rsp.phSWV);
+			
+			rsp.phSWV[TestNum - loopIdx + - strlen("AT%SWV") - 4] = NULL;
+			*(int*)((char*)pFactoryBuf + 32) = (int)(TestNum - loopIdx - strlen("AT%SWV") - 4);
+			memcpy((void*)((char*)pFactoryBuf + 32 + 4), (void*)rsp.phSWV, TestNum - loopIdx - strlen("AT%SWV") - 4 + 1);
+
+			rsp.type = Rsp_Ack;
+			hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t_2)); 				
+			free(pFactoryBuf);
+			break;
+		}
+		case Req_factory_info_t:
+		{
+			int TestNum = 0;
+			int loopIdx = 0, Num = 0;
+			unsigned char	ReadCh, ReadCh2;
+
+			printf("====Req_factory_info_t======\n"); //jb.chae
+			
+			struct prot_rsp_PID_t rsp;
+
+			usbtty_bulk_fifo_index = 0; 
+			if (IsIFXInit == 0)
+			{
+                          ifx_start_low();
+				IsIFXInit = 1;
+			}
+			udelay(10000);
+	
+                           ifx_uart_sw_ctrl(0);
+
+			mdelay(5000);  
+			strcpy((char*)test_Tbuf2, "AT%IMEI");
+			test_Tbuf2[strlen("AT%IMEI")] = 0x0D;
+			
+			printf("============== woonrae woonrae =============\n");
+
+			putsB ((unsigned char*)test_Tbuf2, 8, 1000000);
+			TestNum = 0;
+
+			while (1)
+			{
+				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));
+				mdelay(200);
+
+				Num = 0;
+				ReadCh2 = 0x00;
+				memset((void*)test_Rbuf2, 0x00, sizeof(test_Rbuf2));
+				for (loopIdx = 0; loopIdx < 60; loopIdx++)  //40->60
+				{
+					if (getcB (1000000, (char*)&ReadCh) == -1)
+						break;
+
+					printf("%x \n", ReadCh);
+					if (ReadCh == 0x4B && ReadCh2 == 0x4F)  // 0x4B = K, 0x4F = O
+					{
+						test_Rbuf2[Num++] = ReadCh;
+						getcB (1000000, (char*)&ReadCh);
+						getcB (1000000, (char*)&ReadCh);	
+						break;
+					}
+					else
+						ReadCh2 = ReadCh;
+			
+					test_Rbuf2[Num++] = ReadCh;
+				}
+				printf("============= PASS ================\n");
+				if (test_Rbuf2[8]==0x0d && test_Rbuf2[9]==0x0a && test_Rbuf2[10] == 0x02) //AT%I	
+				{
+					
+					printf("AT Test1:%x, %x, %x, %x\n",test_Rbuf2[8], test_Rbuf2[9], test_Rbuf2[10], test_Rbuf2[11]); 
+					printf("AT Test2:%x, %x, %x, %x\n",test_Rbuf2[12], test_Rbuf2[13], test_Rbuf2[14], test_Rbuf2[15]);	
+					printf("AT Test3:%x, %x, %x, %x\n",test_Rbuf2[16], test_Rbuf2[17], test_Rbuf2[18], test_Rbuf2[19]);	
+					
+					break;
+				}			
+  
+				mdelay(10);
+				putsB ((unsigned char*)test_Tbuf2, 8, 100000);
+				
+				TestNum++; 
+			
+			if (TestNum > 10)
+				break;
+			
+			}
+
+
+			if (TestNum  > 10 )
+			{
+					//FastbootStatus("fail");
+					memset((void*)&rsp, 0x00, sizeof(struct prot_rsp_PID_t));
+					rsp.type = Rsp_Ack;
+					hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t)); 				
+					break;
+			}
+
+
+			memcpy(rsp.phIMEI, (byte*)(test_Rbuf2 + sizeof("AT%IMEI") +3), 17);  
+
+
+			memset(test_Tbuf2, 0x00, sizeof(test_Tbuf2)); 
+			memset(test_Rbuf2, 0x00, sizeof(test_Rbuf2)); 
+			memcpy(rsp.phPID, (byte*)(test_Rbuf2), 64); 
+
+			rsp.type = Rsp_Ack;
+			hdlc_send_packet ((unsigned char*)&rsp, sizeof(struct prot_rsp_PID_t)); 				
+
+			break;
+		}
+
 		case Req_Notify_Start_DL:
 		{
 			usbtty_bulk_fifo_index = 0;	
@@ -201,9 +578,15 @@ extern int		DownloadValid;
 				
 			if(web_download_mode == 1)
 			{
-				web_download_flag2 = 0x00;				lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);				if(web_download_flag2 != LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2) 				{				web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;
+				web_download_flag2 = 0x00;
+				lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);
+
+				if(web_download_flag2 != LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2) 
+				{
+				web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;
 				lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);	
-			}			}
+			}
+			}
 				
 			TxPack.type = Rsp_Ack;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));			
@@ -215,9 +598,25 @@ extern int		DownloadValid;
 		{
 			struct prot_init_partition_t RxInitPart;
 			memcpy((void*)&RxInitPart, (void*)pCmd_buf, sizeof(struct prot_init_partition_t));
-#ifdef CONFIG_COSMO_SU760#else			extern int download_start;			extern int cable_910K_detect;			extern void download_logo(int);								if(cable_910K_detect ==1)			{				download_start =  1; 			}#endif			MmcSecStartAddr = RxInitPart.addr;			MmcSecLength = RxInitPart.len;			
+#ifdef CONFIG_COSMO_SU760
+#else
+			extern int download_start;
+			extern int cable_910K_detect;
+			extern void download_logo(int);
+	
+				
+			if(cable_910K_detect ==1)
+			{
+				download_start =  1; 
+			}
+#endif
+			MmcSecStartAddr = RxInitPart.addr;
+			MmcSecLength = RxInitPart.len;
+			
 			// g_onenand_address = RxInitPart.addr;
-			// g_onenand_address_size = RxInitPart.len;
+			// g_onenand_address_size = RxInitPart.len;
+
+
 			g_onenand_block_offset = 0;
 			onenand_data_offset = 0;				
 			usbtty_bulk_fifo_index = 0;
@@ -231,14 +630,18 @@ extern int		DownloadValid;
 		{
 			struct prot_erase_t Rxerase;
 			memcpy((void*)&Rxerase, (void*)pCmd_buf, sizeof(struct prot_erase_t));
-			MmcSecStartAddr = Rxerase.addr;			// g_onenand_address = Rxerase.addr;
+
+			MmcSecStartAddr = Rxerase.addr;
+			// g_onenand_address = Rxerase.addr;
 			//g_onenand_address_size = Rxerase.len;
 			g_onenand_block_offset = 0;
 			onenand_data_offset = 0;				
 			usbtty_bulk_fifo_index = 0;
 
 
-			// mmc_erase(1, (unsigned int)g_onenand_address, (int)Rxerase.len);			if (1 != mmc_erase(1, (unsigned int)MmcSecStartAddr, (int)Rxerase.len))			{
+			// mmc_erase(1, (unsigned int)g_onenand_address, (int)Rxerase.len);
+			if (1 != mmc_erase(1, (unsigned int)MmcSecStartAddr, (int)Rxerase.len))
+			{
 	
 			TxPack.type = Rsp_Nak;
 				hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));	
@@ -297,13 +700,77 @@ extern int		DownloadValid;
 #endif			
 			MmcSecStartAddr += Rxwrite.len/512;
 			usbtty_bulk_fifo_index = 0;
-			TxPack.type = Req_Write;
+
+			TxPack.type = Req_Write;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));
 			
 			break;
 		}
 
-		case Req_Write_Async:		{			struct prot_write_async_t	Rxwrite;			unsigned long	RealPacketSize = 0;			int		bDLFirst	= 0;			memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_write_async_t));			if (bDLFirst == 0)			{				bDLFirst = 1;				TxPack.type = Rsp_Ack;				hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));							}						while (1)			{				if (Rxwrite.TotalLen <= Rxwrite.len)				{					RealPacketSize = Rxwrite.TotalLen;				}				else				{					RealPacketSize = Rxwrite.len;				}				while (RealPacketSize > usbtty_bulk_fifo_index - CurrentFileIndex)				{					int poll_status;										poll_status = poll_usbtty();					if (TTYUSB_ERROR == poll_status) {						break;					} else if (TTYUSB_DISCONNECT == poll_status) {						printf("USBtty disconnect detected\n");						usbtty_shutdown();						printf("USB term shutdown\n");						usbtty_init();						printf("USBtty Reinitialised\n");					}							}				if (mmc_write(1, &usbtty_bulk_fifo[CurrentFileIndex], (int)MmcSecStartAddr, RealPacketSize) != 1)				{					printf("Write error\n");					while(1);				}				MmcSecStartAddr += RealPacketSize/512;				usbtty_bulk_fifo_index = 0;				Rxwrite.TotalLen -= RealPacketSize;							if (Rxwrite.TotalLen == 0)				{					break;				}				CurrentFileIndex = 0; 			}						break;		}		case Req_Write_Rom_copy:
+		case Req_Write_Async:
+		{
+			struct prot_write_async_t	Rxwrite;
+			unsigned long	RealPacketSize = 0;
+			int		bDLFirst	= 0;
+
+			memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_write_async_t));
+
+			if (bDLFirst == 0)
+			{
+				bDLFirst = 1;
+				TxPack.type = Rsp_Ack;
+				hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));				
+			}			
+
+			while (1)
+			{
+				if (Rxwrite.TotalLen <= Rxwrite.len)
+				{
+					RealPacketSize = Rxwrite.TotalLen;
+				}
+				else
+				{
+					RealPacketSize = Rxwrite.len;
+				}
+
+				while (RealPacketSize > usbtty_bulk_fifo_index - CurrentFileIndex)
+				{
+					int poll_status;
+					
+					poll_status = poll_usbtty();
+
+					if (TTYUSB_ERROR == poll_status) {
+						break;
+					} else if (TTYUSB_DISCONNECT == poll_status) {
+						printf("USBtty disconnect detected\n");
+						usbtty_shutdown();
+						printf("USB term shutdown\n");
+						usbtty_init();
+						printf("USBtty Reinitialised\n");
+					}			
+				}
+
+
+				if (mmc_write(1, &usbtty_bulk_fifo[CurrentFileIndex], (int)MmcSecStartAddr, RealPacketSize) != 1)
+				{
+					printf("Write error\n");
+					while(1);
+				}
+				MmcSecStartAddr += RealPacketSize/512;
+				usbtty_bulk_fifo_index = 0;
+
+				Rxwrite.TotalLen -= RealPacketSize;
+			
+				if (Rxwrite.TotalLen == 0)
+				{
+					break;
+				}
+				CurrentFileIndex = 0; 
+			}
+			
+			break;
+		}
+		case Req_Write_Rom_copy:
 		{
 			break;
 		}		
@@ -315,10 +782,44 @@ extern int		DownloadValid;
 
 		case Req_Read:
 		{
-			struct prot_read_info_t Rxwrite;			unsigned char *pBuf = hdlc_tx_buf;			memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_read_info_t));						//printf("sector addr:%d, length: %d\n", MmcSecStartAddr, Rxwrite.Length);			mmc_read(1, MmcSecStartAddr, pBuf, Rxwrite.Length);			MmcSecStartAddr += Rxwrite.Length/512;						usbtty_bulk_fifo_index = 0;	 			TxPack.type = Rsp_Ack;			nonhdlc_send_packet((unsigned char*)&TxPack, sizeof(struct prot_rsp_t), pBuf, Rxwrite.Length);			break;
+
+			struct prot_read_info_t Rxwrite;
+			unsigned char *pBuf = hdlc_tx_buf;
+
+			memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_read_info_t));
+			
+			//printf("sector addr:%d, length: %d\n", MmcSecStartAddr, Rxwrite.Length);
+			mmc_read(1, MmcSecStartAddr, pBuf, Rxwrite.Length);
+			MmcSecStartAddr += Rxwrite.Length/512;
+			
+			usbtty_bulk_fifo_index = 0;	 
+
+			TxPack.type = Rsp_Ack;
+			nonhdlc_send_packet((unsigned char*)&TxPack, sizeof(struct prot_rsp_t), pBuf, Rxwrite.Length);
+
+			break;
 		}
 
-		case Req_Ready_Read: 		{ 			struct prot_read_ready_info_t	Rxwrite;			memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_read_ready_info_t));				//printf("####1 Start Sector addrss %d\n", Rxwrite.StartAddr);			MmcSecStartAddr = Rxwrite.StartAddr;			//printf("####2 Start Sector addrss %d\n", MmcSecStartAddr);			MmcSecLength = Rxwrite.Length;			//printf("####3 Start Sector addrss %d\n", MmcSecStartAddr);						usbtty_bulk_fifo_index = 0;								TxPack.type = Rsp_Ack;			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));				//printf("####4 Start Sector addrss %d\n", MmcSecStartAddr);			break;					}		case Req_go: 
+		case Req_Ready_Read: 
+		{ 
+			struct prot_read_ready_info_t	Rxwrite;
+			memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_read_ready_info_t));	
+
+			//printf("####1 Start Sector addrss %d\n", Rxwrite.StartAddr);
+			MmcSecStartAddr = Rxwrite.StartAddr;
+			//printf("####2 Start Sector addrss %d\n", MmcSecStartAddr);
+			MmcSecLength = Rxwrite.Length;
+			//printf("####3 Start Sector addrss %d\n", MmcSecStartAddr);
+			
+			usbtty_bulk_fifo_index = 0;		
+			
+			TxPack.type = Rsp_Ack;
+			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));	
+			//printf("####4 Start Sector addrss %d\n", MmcSecStartAddr);
+			break;			
+
+		}
+		case Req_go: 
 		{
 			break;
 		}
@@ -326,7 +827,8 @@ extern int		DownloadValid;
 		case Req_no_op:
 		{
 
-			usbtty_bulk_fifo_index = 0;					TxPack.type = Rsp_Ack;
+			usbtty_bulk_fifo_index = 0;		
+			TxPack.type = Rsp_Ack;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));
 				
 			break;
@@ -336,8 +838,15 @@ extern int		DownloadValid;
 		{
 			TxPack.type = Rsp_Ack;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));
-			char webdownload_finished_flag = 0x00;			lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&webdownload_finished_flag,1);			extern int cable_910K_detect;			extern void muic_for_download(int);
-			char status[1];			if((cable_910K_detect==1) ||(webdownload_finished_flag != 0x00) || (web_download_mode != 0))
+			char webdownload_finished_flag = 0x00;
+			lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&webdownload_finished_flag,1);
+
+
+			extern int cable_910K_detect;
+			extern void muic_for_download(int);
+			char status[1];
+
+			if((cable_910K_detect==1) ||(webdownload_finished_flag != 0x00) || (web_download_mode != 0))
 			{
 				if(webdownload_finished_flag!=0x00 ||web_download_mode != 0 )
 				{
@@ -347,16 +856,89 @@ extern int		DownloadValid;
 					muic_for_download(1); //changing muic form AP USB to CP USB-910K for preventing omap flash pop-up box.
 					udelay(1000000); 
 
-				}#ifdef CONFIG_COSMO_SU760				write_muic_mode_of_dload(0x01);				trap_flag = LGE_NVDATA_RESET_CAUSE_VAL_USER_RESET;				lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_RESET_CAUSE_OFFSET,&trap_flag,1);				status[0] = 'S';				lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_DOWNLOAD_FINISH,&status ,1);				printf("\n download success !!! \n");#else#endif			        udelay(1000000);								        write_dev_on_off(0x47);			}			
+				}
+
+#ifdef CONFIG_COSMO_SU760
+				write_muic_mode_of_dload(0x01);
+
+				trap_flag = LGE_NVDATA_RESET_CAUSE_VAL_USER_RESET;
+				lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_RESET_CAUSE_OFFSET,&trap_flag,1);
+				status[0] = 'S';
+				lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_DOWNLOAD_FINISH,&status ,1);
+				printf("\n download success !!! \n");
+#else
+#endif
+			        udelay(1000000);				
+	
+
+			        write_dev_on_off(0x47);
+			}
+			
 			udelay(1000000);
-			write_dev_on_off( MOD_DEVOFF | CON_DEVOFF | APP_DEVOFF );
+			write_dev_on_off( MOD_DEVOFF | CON_DEVOFF | APP_DEVOFF );
+
 			disable_interrupts ();
 			reset_cpu (0);			
 
 			printf ("--- system reboot! ---\r\n");			
 			break;			
 		}
-		 case Req_CP_USB_Switch:		 {			TxPack.type = Rsp_Ack;			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));			printf ("--- CP USB swiching start ! ---\r\n");					extern void muic_for_download(int);			extern void ifx_dl_reset();			usbtty_bulk_fifo_index = 0;							muic_for_download(0);						ifx_dl_reset();						printf("start udelay \n");					udelay(25000000);			extern int disable_interrupts (void);			printf("end udelay \n");			int muic_mode= muic_init(0);			write_dev_on_off(0x47);						break;		}				case Req_Pre_Reset:		{			TxPack.type = Rsp_Ack;			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));			udelay(1000000); 			usbtty_shutdown();			printf("USB term shutdown\n");			usbtty_init();			printf("USBtty Reinitialised\n");						extern int disable_interrupts (void);			udelay(1000000);			write_dev_on_off(0x47);						extern int disable_interrupts (void);			disable_interrupts ();			reset_cpu (0);						usbtty_bulk_fifo_index = 0;					printf ("--- system pre reboot! ---\r\n");							break;		}
+		 case Req_CP_USB_Switch:
+		 {
+			TxPack.type = Rsp_Ack;
+			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));
+
+			printf ("--- CP USB swiching start ! ---\r\n");		
+
+			extern void muic_for_download(int);
+			extern void ifx_dl_reset();
+
+			usbtty_bulk_fifo_index = 0;				
+			muic_for_download(0);			
+			ifx_dl_reset();
+			
+			printf("start udelay \n");
+		
+			udelay(25000000);
+
+			extern int disable_interrupts (void);
+
+			printf("end udelay \n");
+
+			int muic_mode= muic_init(0);
+			write_dev_on_off(0x47);
+			
+			break;
+		}
+		
+		case Req_Pre_Reset:
+		{
+			TxPack.type = Rsp_Ack;
+			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));
+			udelay(1000000); 
+
+			usbtty_shutdown();
+			printf("USB term shutdown\n");
+			usbtty_init();
+			printf("USBtty Reinitialised\n");			
+
+			extern int disable_interrupts (void);
+
+			udelay(1000000);
+
+			write_dev_on_off(0x47);
+			
+			extern int disable_interrupts (void);
+
+
+			disable_interrupts ();
+			reset_cpu (0);			
+
+			usbtty_bulk_fifo_index = 0;		
+			printf ("--- system pre reboot! ---\r\n");				
+			break;
+		}
+
 		case Req_Powerdown:
 		{
 			break;
@@ -382,12 +964,39 @@ extern int		DownloadValid;
 
 		case Req_IFX_Start_write:
 		{
-#ifdef CONFIG_COSMO_SU760			usbtty_bulk_fifo_index = 0;#else			extern int download_start;			extern int cable_910K_detect;						usbtty_bulk_fifo_index = 0;
-			extern void download_logo(int);						if(cable_910K_detect ==1)			{				download_start =  1; 				download_logo(1);			}	#endif// WEB DOWNLOAD [START]			if(web_download_mode == 1)
+#ifdef CONFIG_COSMO_SU760
+			usbtty_bulk_fifo_index = 0;
+#else
+			extern int download_start;
+			extern int cable_910K_detect;
+			
+			usbtty_bulk_fifo_index = 0;
+
+			extern void download_logo(int);
+			
+			if(cable_910K_detect ==1)
 			{
-				web_download_flag2 = 0x00;				lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);				if(web_download_flag2 != LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2)				{			web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;			lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);						}			}
-// WEB DOWNLOAD [END]
-			TxPack.type = Rsp_Ack;
+				download_start =  1; 
+				download_logo(1);
+			}	
+#endif
+
+// WEB DOWNLOAD [START]
+			if(web_download_mode == 1)
+			{
+				web_download_flag2 = 0x00;
+				lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);
+
+				if(web_download_flag2 != LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2)
+				{
+			web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;
+			lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);			
+			}
+			}
+// WEB DOWNLOAD [END]
+
+
+			TxPack.type = Rsp_Ack;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));			
 			break;
 		}
@@ -470,12 +1079,16 @@ extern int		DownloadValid;
 			// I'm alive
 			pTmpBuf = (unsigned char*)malloc(76);
 			if (Lg_uartRxLen(pTmpBuf, 76, 3000000) == LG_DOWNLOAD_FAIL)
-				while(1);				#if defined(CONFIG_COSMO_REV_B) || defined(CONFIG_COSMO_REV_C) 
+				while(1);	
+			#if defined(CONFIG_COSMO_REV_B) || defined(CONFIG_COSMO_REV_C) 
 				if (pTmpBuf[0] != 0xBB || (pTmpBuf[4] != 0x01 && pTmpBuf[4] != 0x14) )
 					while(1);
-			#else				if (pTmpBuf[0] != 0xBB)						while(1);	
+			#else
+				if (pTmpBuf[0] != 0xBB)	
+					while(1);	
 			#endif
-						
+			
+			
 				
 			TxPack.type = Rsp_Ack;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));				
@@ -549,7 +1162,8 @@ extern int		DownloadValid;
 			}
 						
 			//Lg_NS16550_init (com_port, 0x1A);	
-#if 0 // TODO defined(CONFIG_COSMO)
+#if 0 // TODO defined(CONFIG_COSMO)
+
 			extern  void hub_ifx_uart_sw_ctrl(int sel);
 			// 1. UART switch change to infineon
 			hub_ifx_uart_sw_ctrl(0);
@@ -557,14 +1171,32 @@ extern int		DownloadValid;
 			extern void hub_ifx_dl_reset();
 			// 2. Infineon reset
 			hub_ifx_dl_reset();
-#endif				extern void ifx_start_low();			extern void ifx_uart_sw_ctrl(int);	extern void ifx_dl_reset();				printf ("delay for ifx download : 1\n");			udelay(1000000);			ifx_start_low();#if defined(CONFIG_COSMO_REV_B) || defined(CONFIG_COSMO_REV_C)                          udelay(10000);#endif			ifx_uart_sw_ctrl(0);		
+#endif
+	
+			extern void ifx_start_low();
+			extern void ifx_uart_sw_ctrl(int);
+	extern void ifx_dl_reset();
+	
+			printf ("delay for ifx download : 1\n");
+			udelay(1000000);
+			ifx_start_low();
+
+#if defined(CONFIG_COSMO_REV_B) || defined(CONFIG_COSMO_REV_C)
+                          udelay(10000);
+#endif
+
+
+			ifx_uart_sw_ctrl(0);
+		
+
 			
 			len = 2;
 			strcpy((char*)test_Tbuf, "AT");
 
 			if (putsB ((char*)test_Tbuf, 2, 100000) == LG_DOWNLOAD_FAIL)
 				while(1);
-			if (Lg_uartRxCharWait(0xF0, 100000) == LG_DOWNLOAD_FAIL)			while(1);
+			if (Lg_uartRxCharWait(0xF0, 100000) == LG_DOWNLOAD_FAIL)
+			while(1);
 
 			if (Lg_uartRxLen(test_Rbuf, 0x17, 100000) == LG_DOWNLOAD_FAIL)
 				while(1);
@@ -577,7 +1209,12 @@ extern int		DownloadValid;
 
 			PsiRam_size = (unsigned short)(Rxwrite.len);
 			if (putsB((const char*)&PsiRam_size, sizeof(unsigned short), 100000) == LG_DOWNLOAD_FAIL)
-				while(1);#if ! defined(CONFIG_COSMO_REV_B) && !defined(CONFIG_COSMO_REV_C)			if (putcB (0xFF, 100000) == LG_DOWNLOAD_FAIL)				while(1);#endif			if (putsB((char*)&usbtty_bulk_fifo[CurrentFileIndex], PsiRam_size, 100000) == LG_DOWNLOAD_FAIL)
+				while(1);
+#if ! defined(CONFIG_COSMO_REV_B) && !defined(CONFIG_COSMO_REV_C)
+			if (putcB (0xFF, 100000) == LG_DOWNLOAD_FAIL)
+				while(1);
+#endif
+			if (putsB((char*)&usbtty_bulk_fifo[CurrentFileIndex], PsiRam_size, 100000) == LG_DOWNLOAD_FAIL)
 				while(1);
 			//goto TONAK;
 
@@ -679,9 +1316,11 @@ TONAK:
 			//return LG_DOWNLOAD_FAIL;
 
 			if (putsB((char*)TxBuf, SIZEOFREQFLASHID + 4, 100000) == LG_DOWNLOAD_FAIL)
-				while(1);			if (Lg_uartRxLen(HeaderBuf, IFX_PACKET_HEADER_SIZE, 6000000) == LG_DOWNLOAD_FAIL)
 				while(1);
-			//return LG_DOWNLOAD_FAIL;
+			if (Lg_uartRxLen(HeaderBuf, IFX_PACKET_HEADER_SIZE, 6000000) == LG_DOWNLOAD_FAIL)
+				while(1);
+			//return LG_DOWNLOAD_FAIL;
+
 	
 			if (HeaderBuf[2] != 0x01 || HeaderBuf[3] != 0x08)
 				while(1);
@@ -813,7 +1452,8 @@ TONAK:
 		}
 
 		case Req_IFX_EraseAll:
-		{
+		{
+
 			usbtty_bulk_fifo_index = 0;			
 
 			if (IFXReqFlashEraseStart(TRUE) == LG_DOWNLOAD_FAIL)
@@ -1145,8 +1785,43 @@ static int hdlc_send_packet (unsigned char *pBuf, unsigned int wLen)
   return 1;
 }
 
- static int nonhdlc_send_packet (unsigned char *pCmdBuf, unsigned int wLen, unsigned char *pDataBuf, unsigned int dLen) {   unsigned int i;   unsigned short crc = CRC_16_L_SEED;   unsigned int buffer_pos = 0;   static unsigned char *buffer = NULL;   int pack_len = 4096;   unsigned char CmdBuf[30];    buffer = CmdBuf;//hdlc_tx_buf;    if( wLen == 0 ) 	 return 0;    for(i = 0; i < wLen; i++) { 	 HDLC_ADD_ESC_BUFFER (pCmdBuf[i], pack_len); 	 crc = CRC_16_L_STEP (crc, (unsigned short) pCmdBuf[i]);   }    crc ^= CRC_16_L_SEED;   HDLC_ADD_ESC_BUFFER (((unsigned char) crc), pack_len);   HDLC_ADD_ESC_BUFFER (((unsigned char) ((crc >> 8) & 0xFF)), pack_len);   HDLC_ADD_BUFFER (ASYNC_HDLC_FLAG, pack_len);
-   //if (buffer_pos) { //	 send_buffer (buffer, buffer_pos);  // }   if (pDataBuf) {   	 send_buffer (pDataBuf, dLen);   }     return 1; }
+
+ static int nonhdlc_send_packet (unsigned char *pCmdBuf, unsigned int wLen, unsigned char *pDataBuf, unsigned int dLen)
+ {
+   unsigned int i;
+   unsigned short crc = CRC_16_L_SEED;
+   unsigned int buffer_pos = 0;
+   static unsigned char *buffer = NULL;
+   int pack_len = 4096;
+   unsigned char CmdBuf[30];
+ 
+   buffer = CmdBuf;//hdlc_tx_buf;
+ 
+   if( wLen == 0 )
+ 	 return 0;
+ 
+   for(i = 0; i < wLen; i++) {
+ 	 HDLC_ADD_ESC_BUFFER (pCmdBuf[i], pack_len);
+ 	 crc = CRC_16_L_STEP (crc, (unsigned short) pCmdBuf[i]);
+   }
+ 
+   crc ^= CRC_16_L_SEED;
+   HDLC_ADD_ESC_BUFFER (((unsigned char) crc), pack_len);
+   HDLC_ADD_ESC_BUFFER (((unsigned char) ((crc >> 8) & 0xFF)), pack_len);
+   HDLC_ADD_BUFFER (ASYNC_HDLC_FLAG, pack_len);
+
+   //if (buffer_pos) {
+ //	 send_buffer (buffer, buffer_pos);
+  // }
+
+   if (pDataBuf) {
+   	 send_buffer (pDataBuf, dLen);
+   }
+  
+   return 1;
+ }
+
+
 int Lg_uartRxCharWait(unsigned char ch, unsigned int escape_cnt)
 {
 	unsigned int		len;
@@ -1164,7 +1839,8 @@ int Lg_uartRxCharWait(unsigned char ch, unsigned int escape_cnt)
 				return LG_DOWNLOAD_FAIL;
         }
 		else
-		{
+		{
+
 			if (ReadCh == ch)
 				return LG_DOWNLOAD_SUCCESS;
 			else
@@ -1172,8 +1848,14 @@ int Lg_uartRxCharWait(unsigned char ch, unsigned int escape_cnt)
 				if (escape_cnt-- == 0)
 					return LG_DOWNLOAD_FAIL;
 			}
-		}#if defined(CONFIG_COSMO_REV_B) || defined(CONFIG_COSMO_REV_C)		udelay(50000);	#else
-		udelay(10000);	#endif		if (putsB ((char*)test_Tbuf, 2, 100000) == LG_DOWNLOAD_FAIL)
+		}
+
+#if defined(CONFIG_COSMO_REV_B) || defined(CONFIG_COSMO_REV_C)
+		udelay(50000);	
+#else
+		udelay(10000);	
+#endif
+		if (putsB ((char*)test_Tbuf, 2, 100000) == LG_DOWNLOAD_FAIL)
 			return LG_DOWNLOAD_FAIL;		
 	}
 
@@ -1355,7 +2037,8 @@ int IFXReqCfiInfo_1(void)
 	HeaderBuf[2] = 0x84; // Type
 	HeaderBuf[4] = 0x02; // Size
 
-	printf("Lg_Checksum_ShortB start\n");
+	printf("Lg_Checksum_ShortB start\n");
+
 	CheckSumVal = Lg_Checksum_ShortB(TxBuf, sizeof(ReqCfiInfo_1));
 	CheckSumVal += (HeaderBuf[2] + HeaderBuf[4]);
 	TxBuf[SIZEOFREQCFIINFO_1] = (unsigned char)(CheckSumVal);
@@ -1396,9 +2079,17 @@ int IFXReqCfiInfo_1(void)
 	//return LG_DOWNLOAD_FAIL;;
 
 
-#if 1	//FW KIMBYUNGCHUL 20101116 [START]			XG618 : TxBuf[5], 		 XG626 : TxBuf[6]	if (TxBuf[4] == 0x00 || TxBuf[6] == 0x00)		while(1);#else	if (TxBuf[4] == 0x00 || TxBuf[5] == 0x00)
+
+#if 1	//FW KIMBYUNGCHUL 20101116 [START]			XG618 : TxBuf[5], 		 XG626 : TxBuf[6]
+	if (TxBuf[4] == 0x00 || TxBuf[6] == 0x00)
 		while(1);
-#endif	//FW KIMBYUNGCHUL 20101116 [END]
+#else
+	if (TxBuf[4] == 0x00 || TxBuf[5] == 0x00)
+		while(1);
+
+
+#endif	//FW KIMBYUNGCHUL 20101116 [END]
+
 	return LG_DOWNLOAD_SUCCESS;
 }
 
@@ -1490,7 +2181,8 @@ int IFXReqFlashEraseStart(char bEraseAll)
 		ReqFlashEraseStart[5] = 0xFF;
 		ReqFlashEraseStart[6] = 0xFF;
 		ReqFlashEraseStart[7] = 0xFF;
-	}
+	
+}
 
 	memcpy(TxBuf, ReqFlashEraseStart, SIZEOFREQFLASHERASEEEP);
 	memset(HeaderBuf, 0x00, IFX_PACKET_HEADER_SIZE);
