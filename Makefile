@@ -2037,6 +2037,17 @@ cx2_su870_rev_b_mipi_config : unconfig
 		echo "#define CONFIG_COSMO_MIPI_HSI 1" >> ./include/config.h ;\
 	fi
 	@./mkconfig -a cx2 arm omap4 cx2
+
+p2_config \
+p2_default_config : unconfig
+	@if [ "$(findstring p2, $@)" ] ; then \
+		echo "#define CONFIG_P2_REV_A 1" >> ./include/config.h ;\
+		echo "#define CONFIG_P2_P940 1" >> ./include/config.h ;\
+	fi;
+	@if [ "$(findstring _mipi, $@)" ] ; then \
+		echo "#define CONFIG_COSMO_MIPI_HSI 1" >> ./include/config.h ;\
+	fi
+	@./mkconfig -a p2 arm omap4 p2
 #========================================================================
 # i386
 #========================================================================

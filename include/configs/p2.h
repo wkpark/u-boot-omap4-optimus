@@ -8,6 +8,8 @@
 #define CONFIG_4430SDP		1    
 #define CONFIG_FASTBOOT		1    
 
+#define BOARD_LATE_INIT		1
+
 #define CONFIG_COSMO            1
 
 #define CONFIG_COSMO_BOOT_IMG	1

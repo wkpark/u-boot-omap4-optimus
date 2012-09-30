@@ -223,22 +223,20 @@ static int load_ptbl(void)
 	return 0;
 }
 
+#if 0
 struct partition {
 	const char *name;
 	unsigned size_kb;
 };
 
 static struct partition partitions[] = {
-	{ "mbr", 128 },			/* 128KB */
+	{ "-", 128 },			/* 128KB */
 	{ "xloader", 384 },		/* 384KB */
-	{ "bootloader", 384 },	/* 384KB */
-	{ "environment", 128 },	/* 128KB */
-	{ "scr", 1024 },		/* 1024KB */
-	{ "kernel", 14336 },	/* (14 * 1024)KB */
-	{ "recovery", 507904 },	/* (496 * 1024)KB */
-	{ "system", 256000 },	/* (250 * 1024)KB */
-	{ "userdata", 256000},	/* (250 * 1024)KB */
-	{ "cache", 256000 },	/* (250 * 1024)KB */
+	{ "bootloader", 1024 },		/* 1024KB */
+	{ "boot", 6*1024 },		/* (6 * 1024)KB */
+	{ "recovery", 6*1024 },		/* (6 * 1024)KB */
+	{ "system", 670*1024*1024 },	/* (670 * 1024 * 1024)KB */
+	{ "userdata", 2344*1024*1024 },	/* (250 * 1024)KB */
 	{ 0, 0 },
 };
 
@@ -285,20 +283,25 @@ static int do_format(void)
 
 	return 0;
 }
+#endif
+
 int fastboot_oem(const char *cmd)
 {
+#if 0
 	if (!strcmp(cmd,"format"))
 		return do_format();
+#endif
 	return -1;
 }
 
 
 void board_mmc_init(void)
 {
+#if 0
 #if (CONFIG_FASTBOOT)
 
 	/* Partitons on EMMC preasent on OMAP4SDP required for Fastboot*/
-	fastboot_ptentry ptn[10] = {
+	fastboot_ptentry ptn[7] = {
 		{
 			.name   = "ptable",
 			.start  = 0x00, /*Sector Start */
@@ -307,62 +310,80 @@ void board_mmc_init(void)
 		},
 		{
 			.name   = "xloader",
-			.start  = 0x100, /*Sector Start */
-			.length = 128*1024, /*128KB */
+			.start  = 0x100, /* Sector Start */
+			.length = 384*1024, /* 384KB */
 			.flags  = 0,
 		},
 		{
 			.name   = "bootloader",
-			.start  = 0x200, /*Sector Start */
-			.length = 256*1024, /*256KB */
+			.start  = 0x400, /*Sector Start */
+			.length = 1024*1024, /* 1024KB */
 			.flags  = 0,
 		},
 		{
-			.name   = "environment",
-			.start  = 0x400,  /* Sector Start */
-			.length = 128*1024, /*128KB */
-			.flags  = FASTBOOT_PTENTRY_FLAGS_WRITE_ENV,
-		},
-		{
 			.name   = "boot",
-			.start  = 0x500,  /* Sector Start */
-			.length = 14*1024*1024, /*14MB */
+			.start  = 0xc00,  /* Sector Start */
+			.length = 6*1024*1024, /* 6MB */
 			.flags  = 0,
 		},
 		{
 			.name   = "recovery",
-			.start  = 0x7500, /*Sector Start */
-			.length = 14*1024*1024, /*14MB */
+			.start  = 0x3c00, /*Sector Start */
+			.length = 6*1024*1024, /* 6MB */
 			.flags  = 0,
 		},
 		{
 			.name   = "system",
-			.start  = 0x11800,  /* Sector Start */
-			.length = 384*1024*1024, /*384MB */
+			.start  = 0x14000,  /* Sector Start */
+			.length = 670*1024*1024, /* 670MB */
 			.flags  = 0,
 		},
 		{
 			.name   = "userdata",
-			.start  = 0xD2000,  /* Sector Start */
-			.length = 512*1024*1024, /*512MB */
+			.start  = 0x163000,  /* Sector Start */
+			.length = 2344*1024*1024, /* 2344MB */
 			.flags  = 0,
 		},
+#if 0
 		{
+			/* XXX WARNING: cache partition is separated in the ICS of SU540 */
 			.name   = "cache",
-			.start  = 0x1D5000,  /* Sector Start */
-			.length = 128*1024*1024, /*128MB */
+			.start  = 0x5f7000,  /* Sector Start */
+			.length = 384*1024*1024, /* 384MB */
 			.flags  = 0,
 		},
 		{
 			.name   = "media",
-			.start  = 0x217800,  /* Sector Start */
-			.length = 1024*1024*1024, /*1GB */
+			.start  = 0xd6e00000,  /* Sector Start */
+			.length = 11595*1024*1024, /* 11.3GB */
 			.flags  = 0,
 		},
+#endif
 		/* Rest of the RAW Partitions can start from Sector start 0x27B622 */
 	};
 	int i;
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 7; i++)
 		fastboot_flash_add_ptn(&ptn[i]);
 #endif
+#endif
+}
+
+int omap4_mmc_init(void)
+{
+        int i;
+	int mmc_slot = 1;
+#if 0
+	char booticmd[20];
+#endif
+
+        if (mmc_init(mmc_slot)) {
+                printf("mmc init failed?\n");
+                return 1;
+        }
+#if 0
+        sprintf(booticmd, "booti mmc%d", mmc_slot);
+        setenv("bootcmd", booticmd);
+#endif
+        printf("efi partition table:\n");
+        return load_ptbl();
 }
