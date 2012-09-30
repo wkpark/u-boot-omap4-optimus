@@ -8,6 +8,8 @@
 #include "p2_dss.h"
 
 #include "lg_logo_data.h"
+#include "font8x8.h"
+#include "font8x16.h"
 
 #define DEBUG_DSI_VIDEO_MODE
 
