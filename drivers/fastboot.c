@@ -64,7 +64,14 @@ static volatile u32 *otghs_control = (volatile u32  *)USBOTGHS_CONTROL;
 #define DEVICE_PRODUCT_ID 0xD022
 
 #define DEVICE_BCD        0x0100;
+/* This is used to get the serial number */
+#if defined(CONFIG_4430SDP) || defined(CONFIG_4430PANDA)
+#define DIE_ID_REG_BASE		(OMAP44XX_L4_IO_BASE + 0x2000)
+#define DIE_ID_REG_OFFSET		0x200
+#define MAX_USB_SERIAL_NUM              17
+#endif
 
+/* String 0 is the language id */
 #define DEVICE_STRING_PRODUCT_INDEX       1
 #define DEVICE_STRING_SERIAL_NUMBER_INDEX 2
 #define DEVICE_STRING_CONFIG_INDEX        3
@@ -110,7 +117,7 @@ static struct usb_device_request req;
 
 static u8 fastboot_bulk_fifo[0x0200] __attribute__ ((aligned(0x4)));
 
-static char *device_strings[DEVICE_STRING_MANUFACTURER_INDEX+1];
+static char *device_strings[DEVICE_STRING_MAX_INDEX+1];
 
 static struct cmd_fastboot_interface *fastboot_interface = NULL;
 
@@ -1068,7 +1075,13 @@ int fastboot_init(struct cmd_fastboot_interface *interface)
 #elif defined (CONFIG_3430LABRADOR)
 	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "Zoom";
 #elif defined(CONFIG_4430SDP)
+#if defined(CONFIG_LGE_P2)
+	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "LG P2";
+#elif defined(CONFIG_LGE_CX2)
+	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "LG CX2";
+#else
 	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "SDP4";
+#endif
 #elif defined(CONFIG_4430PANDA)
 	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "PANDA";
 #else
@@ -1077,7 +1090,25 @@ int fastboot_init(struct cmd_fastboot_interface *interface)
 
 #endif
 	
+#if defined(CONFIG_4430SDP) || defined(CONFIG_4430PANDA)
+	unsigned int val[4] = { 0 };
+	unsigned int reg;
+	static char device_serial[MAX_USB_SERIAL_NUM] = "00123";
+
+	reg = DIE_ID_REG_BASE + DIE_ID_REG_OFFSET;
+
+	val[0] = __raw_readl(reg);
+	val[1] = __raw_readl(reg + 0x8);
+	val[2] = __raw_readl(reg + 0xC);
+	val[3] = __raw_readl(reg + 0x10);
+	printf("Device Serial Number: %08X%08X\n", val[1], val[0]);
+	sprintf(device_serial, "%08X%08X", val[1], val[0]);
+
+	device_strings[DEVICE_STRING_SERIAL_NUMBER_INDEX] = device_serial;
+#else
+	/* These are just made up */
 	device_strings[DEVICE_STRING_SERIAL_NUMBER_INDEX] = "00123";
+#endif
 	device_strings[DEVICE_STRING_CONFIG_INDEX]        = "Android Fastboot";
 	device_strings[DEVICE_STRING_INTERFACE_INDEX]     = "Android Fastboot";
 
