@@ -10,6 +10,7 @@
 #include "lg_logo_data.h"
 #include "font8x8.h"
 #include "font8x16.h"
+#include "web_download.h"
 
 #define DEBUG_DSI_VIDEO_MODE
 
