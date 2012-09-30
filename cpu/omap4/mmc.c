@@ -597,7 +597,7 @@ unsigned char omap_mmc_read_sect(unsigned int start_sec, unsigned int num_bytes,
 		printf("mmc read: Invalid size\n");
 		return 1;
 	}
-#if ! defined (CONFIG_LGE_CX2) 
+#if ! defined (CONFIG_LGE_CX2) || ! defined (CONFIG_LGE_P2)
 
 	mmc_set_clk_data_width(mmc_cont_cur, 8, 48000);
 
@@ -725,7 +725,7 @@ unsigned char omap_mmc_erase_sect(unsigned int start,
 		return err;
 	}
 	
-#if defined (CONFIG_LGE_CX2) 
+#if defined (CONFIG_LGE_CX2) || defined (CONFIG_LGE_P2)
 	err = mmc_send_cmd(mmc_cont_cur->base, MMC_CMD38,  0x00000001, resp);
 #else
 	err = mmc_send_cmd(mmc_cont_cur->base, MMC_CMD38,  0x80000001, resp);
@@ -774,7 +774,7 @@ unsigned char omap_mmc_erase_sect(unsigned int start,
 			"out of card range\n");
 		return 1;
 	}
-#if ! defined (CONFIG_LGE_CX2) 
+#if ! defined (CONFIG_LGE_CX2) || ! defined (CONFIG_LGE_P2)
 
 	mmc_set_clk_data_width(mmc_cont_cur, 8, 48000);
 
@@ -795,7 +795,7 @@ unsigned char omap_mmc_erase_sect(unsigned int start,
 			blk_cnt_current_tns = num_sec_val;
 
 		if (blk_cnt_current_tns > 1) {
-#if ! defined (CONFIG_LGE_CX2) 
+#if ! defined (CONFIG_LGE_CX2) || ! defined (CONFIG_LGE_P2)
 			err = mmc_send_cmd(mmc_cont_cur->base, MMC_CMD23,
 						blk_cnt_current_tns, resp);
 			if (err != 1)

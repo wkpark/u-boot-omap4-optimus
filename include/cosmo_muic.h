@@ -14,7 +14,7 @@
 #define CONTROL_2	(u8)0x02
 #define SW_CONTROL	(u8)0x03
 #define INT_STATUS	(u8)0x04
-#if defined (CONFIG_LGE_CX2) 
+#if defined (CONFIG_LGE_CX2) || defined (CONFIG_LGE_P2)
 #define STATUS		(u8)0x06
 #else
 #define STATUS		(u8)0x05
@@ -23,7 +23,7 @@
 #define ID_2P2	(u8)0x40
 #define ID_620	(u8)0x20
 #define ID_200	(u8)0x10	
-#if defined (CONFIG_LGE_CX2) 
+#if defined (CONFIG_LGE_CX2) || defined (CONFIG_LGE_P2)
 #define VLDO	(u8)0x00	
 #else
 #define VLDO	(u8)0x08	

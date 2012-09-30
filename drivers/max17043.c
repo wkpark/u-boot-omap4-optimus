@@ -9,7 +9,7 @@
 #include "max17043.h"
 #include <charging_ic.h>
 #include <i2c.h>
-#if defined (CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined (CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 #include "gpio_i2c.h"
 #endif
 #define MAX17043_I2C_ADDR	0x36
@@ -108,7 +108,7 @@ static int max17043_read_reg(int reg, uchar* data)
 	while(try--)
 	{
 		udelay(100);
-#if defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 		D("I2C1_read");
 		ret = I2C1_read(reg, data, 2, 2);
 #else
@@ -134,7 +134,7 @@ static int max17043_write_reg(int reg, uchar* data)
 	{
 		udelay(100);
 		
-#if defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 		D("I2C1_write");
 		ret = I2C1_write(reg, data, 2, 2);
 #else
@@ -298,7 +298,7 @@ int get_capacity_once()
 {
 	int soc;
 
-#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 	max17043_init();
 #endif
 
@@ -312,7 +312,7 @@ int get_capacity_once()
 	}
 	D("get_capacity = %d", soc);
 
-#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 	max17043_deinit();
 #endif
 
@@ -333,7 +333,7 @@ int get_voltage_once()
 {
 	int volt;
 
-#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 	max17043_init();
 #endif
 
@@ -341,7 +341,7 @@ int get_voltage_once()
 
 	volt = (max17043_vcell * 5) >> 2 ;
 	D("get_voltage = %d", volt);
-#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 	max17043_deinit();
 #endif
 
@@ -354,7 +354,7 @@ int get_voltage_avg()
 	int volt = 0;
 	int count = MAX_COUNT;
 
-#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 	max17043_init();
 #endif
 
@@ -367,7 +367,7 @@ int get_voltage_avg()
 	volt /= MAX_COUNT;
 	max17043_vcell = volt;
 	D("get_voltage = %d", volt);
-#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
+#if defined(CONFIG_COSMO_REV_10) || defined(CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
 	max17043_deinit();
 #endif
 

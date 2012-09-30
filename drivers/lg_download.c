@@ -661,7 +661,7 @@ void Main_Event_Process(void)
 			size_t retlen, oobretlen;
 			unsigned int    badblockIdx = 0;
 			unsigned int	AccumSize = 0;			
-#if defined (CONFIG_LGE_CX2) 
+#if defined (CONFIG_LGE_CX2) || defined (CONFIG_LGE_P2)
                         memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_write_t));
 #else
 			memcpy((void*)&Rxwrite, (void*)pCmd_buf, sizeof(struct prot_init_partition_t));
