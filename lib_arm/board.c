@@ -689,8 +689,7 @@ void start_armboot (void)
 
 	console_init_r ();	
 
-#if 1
-	
+
 	int count = 0;
 	int charging_mode;
 	char bufTmp[1];
@@ -737,7 +736,6 @@ void start_armboot (void)
 			lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_SECOND,&down,1);
 			printf("\n\n first flag == %c \n\n",down[0]);
 		}
-#else
 #endif		
 		isFactoryReset = 1;
 	}
@@ -830,7 +828,7 @@ void start_armboot (void)
 
 	extern void dload_serial_init(void);
 
-#if 0
+#ifdef CONFIG_LGE_WEB_DOWNLOAD
 	/* support LGE_WEB_DOWNLOAD */
 	web_down_flag1 = 0x00;
 	web_down_flag2 = 0x00;
@@ -841,125 +839,110 @@ void start_armboot (void)
 		(web_down_flag2 == LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2) )
 	{
 	        web_download_mode = 1;               
-	
-		 if(web_down_flag1!=0x00)
-		 {
-		 web_down_flag1 = 0x00;	
-	 	 lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET1,&web_down_flag1,1);
-	}
-	}
-	else
-        {
-		web_download_mode = 0;
-        }	
 
-	 
-	 
+		if(web_down_flag1!=0x00)
+		{
+			web_down_flag1 = 0x00;
+			lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET1,&web_down_flag1,1);
+		}
+	} else {
+		web_download_mode = 0;
+	}
+#endif
 
 	if( muic_mode != 1 )
 	{
 #ifdef CONFIG_COSMO_SU760
 		lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_SECOND,&down,1);
-
-		lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_SECOND,&down,1);
 		printf("\n\n pre if flag == %c \n\n\n\n\n\n \n\n",down[0]);
 
 		if(down[0] =='F'  && cable_910K_detect == 1 ){
 			down[0] = 'S';
-			lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_SECOND,&down,1);			
-			}
-		else if(down[0] == 'S'&& cable_910K_detect == 1){		
+			lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_SECOND,&down,1);
+		}
+		else if(down[0] == 'S'&& cable_910K_detect == 1){
 			down[0] = 'T';
-			lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_SECOND,&down,1);	
-		}
-#ifdef CONFIG_COSMO_SU760
-#else
-		else if(down[0] == 'T'&& cable_910K_detect == 1){		
-			down[0] = 'N';
-			lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_SECOND,&down,1);	
-		}
-#endif
-		else{
-#else
-#endif
-
-#ifdef CONFIG_COSMO_SU760
-	if ((downloadkey() && (cable_open_usb_detect || cable_56K_detect)) || ( dload_mode != 1 && cable_910K_detect == 1) || (web_download_mode == 1) ) {	
-		download_logo(1);
-		success[0]='F';
-		lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_DOWNLOAD_FINISH,&success,1);
-#else
-	if (downloadkey() || ( dload_mode!=1&&cable_910K_detect==1) || (web_download_mode==1) ) {	
-#endif
-
-		if((web_download_mode==1)&&(!downloadkey())) { 
-
-			if(muic_mode == 4)	
-			{
-			#ifndef CONFIG_COSMO_SU760
-				download_logo(0); 
-			#endif
-				start_vib();		  
-			}
-			else
-			{
-			#ifndef CONFIG_COSMO_SU760
-				download_logo(0); 
-				
-				download_logo(2);  
-			#endif	
-				muic_for_download(0);
-				muic_for_download(1); 
-				udelay(5000000); 
-				write_dev_on_off(0x47);	
-				udelay(1000000); 
-
-				disable_interrupts ();
-
-				reset_cpu (0);	
-			}
+			lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_SECOND,&down,1);
 		}
 #ifndef CONFIG_COSMO_SU760
-                if((web_download_mode==1)&&(downloadkey()) ) {  
-			web_down_flag2 = 0x00;	
-	 	 	lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_down_flag2,1);
+		else if(down[0] == 'T'&& cable_910K_detect == 1){
+			down[0] = 'N';
+			lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_SECOND,&down,1);
+		}
+#endif
+		else
+#endif
 
-				udelay(1000000); 
-				write_dev_on_off(0x47);	
-				udelay(1000000); 
+#ifdef CONFIG_LGE_WEB_DOWNLOAD
+#ifdef CONFIG_COSMO_SU760
+		if ((downloadkey() && (cable_open_usb_detect || cable_56K_detect)) || ( dload_mode != 1 && cable_910K_detect == 1) || (web_download_mode == 1) ) {
+			download_logo(1);
+			success[0]='F';
+			lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_DOWNLOAD_FINISH,&success,1);
+#else
+		if (downloadkey() || ( dload_mode!=1&&cable_910K_detect==1) || (web_download_mode==1) ) {
+#endif
+			if((web_download_mode==1)&&(!downloadkey())) {
+				if(muic_mode == 4)
+				{
+#ifndef CONFIG_COSMO_SU760
+					download_logo(0);
+#endif
+					start_vib();
+				}
+				else
+				{
+#ifndef CONFIG_COSMO_SU760
+					download_logo(0);
+				
+					download_logo(2);
+#endif
+					muic_for_download(0);
+					muic_for_download(1);
+					udelay(5000000);
+					write_dev_on_off(0x47);
+					udelay(1000000);
+
+					disable_interrupts ();
+
+					reset_cpu (0);
+				}
+			}
+#ifndef CONFIG_COSMO_SU760
+			if ((web_download_mode==1)&&(downloadkey()) ) {
+				web_down_flag2 = 0x00;
+				lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_down_flag2,1);
+
+				udelay(1000000);
+				write_dev_on_off(0x47);
+				udelay(1000000);
 
 				disable_interrupts ();
 
-				reset_cpu (0);	
+				reset_cpu (0);
 			}
-#endif				
+#endif
 
-		int usb = 0;
-		DownloadValid = 1;
-		dload_serial_init();
+			int usb = 0;
+			DownloadValid = 1;
+			dload_serial_init();
 
 #ifdef CONFIG_COSMO_SU760
-		usb = go_usbdownload();
+			usb = go_usbdownload();
 #else
-		if(cable_910K_detect == 1)
+			if (cable_910K_detect == 1)
 				usb = go_usbdownload(1);
-		else
+			else
 				usb = go_usbdownload(0);
 #endif		
-		printf("%d \n ",usb);
+			printf("%d \n ",usb);
 
-		if(usb !=1)  
-			for (;;);
-		
-	}
-#ifdef CONFIG_COSMO_SU760
+			if(usb !=1)
+				for (;;);
 		}
-#else
-
 #endif
 	}
-#endif
-	
+
 	check_battery_temp_for_safe_charging_and_quick_start(charging_mode, muic_mode);
 
 	force_i2c3_stop_condition();
@@ -985,7 +968,7 @@ void start_armboot (void)
 	if ((s = getenv ("bootfile")) != NULL) {
 		copy_filename (BootFile, s, sizeof (BootFile));
 	}
-#endif	
+#endif
 
 #ifdef BOARD_LATE_INIT
 	board_late_init ();
@@ -999,7 +982,7 @@ void start_armboot (void)
 
 	init_panel();
 
-#if 0
+#ifdef CONFIG_LGE_TRAP
 	char trap_flag;
 	char post_trap_flag = 0;
 
@@ -1085,7 +1068,7 @@ void start_armboot (void)
 	fbcon_setup(&fb_cfg);
 #endif
 
-#if 0
+#ifdef CONFIG_LGE_TRAP
 	extern int trap_exit_key(void);
 	if(post_trap_flag != 0x00)
 	{
@@ -1117,11 +1100,9 @@ void start_armboot (void)
 			while(trap_key_pressed == 0);
 		}
 	}
-#endif
-	
-#endif 
+#endif /* CONFIG_LGE_TRAP */
 
-		vt_cam_standby(); 	
+	vt_cam_standby();
 
 #ifdef CONFIG_COSMO_SU760
 	ifx_boot_start();
