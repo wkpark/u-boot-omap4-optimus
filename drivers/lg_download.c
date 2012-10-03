@@ -13,8 +13,9 @@
 #include <asm/arch/gpio.h>
 #include <mmc.h>
 
+#ifdef CONFIG_LGE_NVDATA
 #include <lge_nvdata_emmc.h>
-
+#endif
 
 #include <twl6030.h>
 
@@ -195,6 +196,7 @@ void Main_Event_Process(void)
                     		web_rsp.rsp_data.connection_mode = 2; /* Download Mode */
                     		break;
                 		}
+#ifdef CONFIG_LGE_NVDATA
                 		case WEBDLOAD_READ_IMEI:
                 		{
 					lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_IMEI_OFFSET,IMEI,15);
@@ -202,6 +204,7 @@ void Main_Event_Process(void)
 				
                     		break;
                 		}
+#endif
                 		default:
                 		{
                     		web_rsp.success = 0;
@@ -307,7 +310,8 @@ void Main_Event_Process(void)
 
 				break;
 			}
-				
+
+#ifdef CONFIG_LGE_NVDATA
 			if (TestNum > 10)
 			{
 				int ModelNameSize = 0;
@@ -337,6 +341,7 @@ void Main_Event_Process(void)
 				break;
 			}
 			else
+#endif
 			{
 				int char_num = 0 ;
 				printf("###### find PID\n");
@@ -346,12 +351,13 @@ void Main_Event_Process(void)
 				printf(" \n \n \n \n PID = %s \n\n\n\n",pFactoryBuf );
 
 
+#ifdef CONFIG_LGE_NVDATA
 				while(char_num < 32 )
 				{
 					lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_PID_DETECT_OFFSET+(char_num*2),rsp.phPID+char_num,1);
 					char_num++;
 				}
-
+#endif
 			}
 
 
@@ -575,18 +581,20 @@ void Main_Event_Process(void)
 			usbtty_bulk_fifo_index = 0;		
 
 			mmc_init(1);
-				
+
+#ifdef CONFIG_LGE_NVDATA
 			if(web_download_mode == 1)
 			{
 				web_download_flag2 = 0x00;
 				lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);
 
-				if(web_download_flag2 != LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2) 
+				if(web_download_flag2 != LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2)
 				{
-				web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;
-				lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);	
+					web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;
+					lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);
+				}
 			}
-			}
+#endif
 				
 			TxPack.type = Rsp_Ack;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));			
@@ -598,8 +606,7 @@ void Main_Event_Process(void)
 		{
 			struct prot_init_partition_t RxInitPart;
 			memcpy((void*)&RxInitPart, (void*)pCmd_buf, sizeof(struct prot_init_partition_t));
-#ifdef CONFIG_COSMO_SU760
-#else
+#ifndef CONFIG_COSMO_SU760
 			extern int download_start;
 			extern int cable_910K_detect;
 			extern void download_logo(int);
@@ -839,8 +846,9 @@ void Main_Event_Process(void)
 			TxPack.type = Rsp_Ack;
 			hdlc_send_packet ((unsigned char*)&TxPack, sizeof(struct prot_rsp_t));
 			char webdownload_finished_flag = 0x00;
+#ifdef CONFIG_LGE_NVDATA
 			lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&webdownload_finished_flag,1);
-
+#endif
 
 			extern int cable_910K_detect;
 			extern void muic_for_download(int);
@@ -851,7 +859,9 @@ void Main_Event_Process(void)
 				if(webdownload_finished_flag!=0x00 ||web_download_mode != 0 )
 				{
 					web_download_flag2 = 0x00; 
+#ifdef CONFIG_LGE_NVDATA
 					lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);
+#endif
 					muic_for_download(0);
 					muic_for_download(1); //changing muic form AP USB to CP USB-910K for preventing omap flash pop-up box.
 					udelay(1000000); 
@@ -866,7 +876,6 @@ void Main_Event_Process(void)
 				status[0] = 'S';
 				lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_DOWNLOAD_FINISH,&status ,1);
 				printf("\n download success !!! \n");
-#else
 #endif
 			        udelay(1000000);				
 	
@@ -982,6 +991,7 @@ void Main_Event_Process(void)
 #endif
 
 // WEB DOWNLOAD [START]
+#ifdef CONFIG_LGE_NVDATA
 			if(web_download_mode == 1)
 			{
 				web_download_flag2 = 0x00;
@@ -989,10 +999,11 @@ void Main_Event_Process(void)
 
 				if(web_download_flag2 != LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2)
 				{
-			web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;
-			lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);			
+					web_download_flag2 = LGE_NVDATA_RESET_CAUSE_WEB_DOWNLOAD_RESET2;
+					lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_download_flag2,1);
+				}
 			}
-			}
+#endif
 // WEB DOWNLOAD [END]
 
 

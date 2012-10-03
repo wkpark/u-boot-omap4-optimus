@@ -30,7 +30,9 @@
 
 #include <twl6030.h>
 
+#ifdef CONFIG_LGE_NVDATA
 #include <lge_nvdata_emmc.h>
+#endif
 
 #define CABLE_DETECT_910K
 
@@ -701,6 +703,7 @@ void start_armboot (void)
 	select_bus(I2C1, OMAP_I2C_STANDARD);
 
 	int isHardReset = 0;
+#ifdef CONFIG_LGE_NVDATA
 	do{
 		hw_cond = read_current_hw_condition();
 		if(!(hw_cond & STS_PWRON) && isVolumeDownKeyPressed()){
@@ -717,8 +720,10 @@ void start_armboot (void)
 		else
 			break;
 	}while(1);
+#endif
 	
 	int isFactoryReset = 0;
+#ifdef CONFIG_LGE_NVDATA
 	lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_FACTORY_RESET_STATUS_OFFSET,&bufTmp,1);
 	if(bufTmp[0] == 'R'){
 #ifdef CONFIG_COSMO_SU760
@@ -739,13 +744,6 @@ void start_armboot (void)
 #endif		
 		isFactoryReset = 1;
 	}
-	else
-	{
-		printf("###### NOT FACTORY RESET\n");
-		isFactoryReset = 0;
-
-	}
-	 
 
 	lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_FRSTSTATUS_OFFSET,&bufTmp,1);
 	if(bufTmp[0] == '1' || bufTmp[0] == '3' || bufTmp[0] == '4' ){
@@ -761,6 +759,7 @@ void start_armboot (void)
 			isFactoryReset = 1;
 		}
 	}
+#endif /* CONFIG_LGE_NVDATA */
 
 	extern int	recoverykey(void); 
 	int i;
@@ -826,7 +825,7 @@ void start_armboot (void)
 
 	extern void dload_serial_init(void);
 
-#ifdef CONFIG_LGE_WEB_DOWNLOAD
+#if defined(CONFIG_LGE_WEB_DOWNLOAD) && defined(CONFIG_LGE_NVDATA)
 	/* support LGE_WEB_DOWNLOAD */
 	web_down_flag1 = 0x00;
 	web_down_flag2 = 0x00;
@@ -880,6 +879,8 @@ void start_armboot (void)
 #else
 		if (downloadkey() || ( dload_mode!=1&&cable_910K_detect==1) || (web_download_mode==1) ) {
 #endif
+			download_logo(0);
+
 			if((web_download_mode==1)&&(!downloadkey())) {
 				if(muic_mode == 4)
 				{
@@ -908,8 +909,10 @@ void start_armboot (void)
 			}
 #ifndef CONFIG_COSMO_SU760
 			if ((web_download_mode==1)&&(downloadkey()) ) {
+#ifdef CONFIG_LGE_NVDATA
 				web_down_flag2 = 0x00;
 				lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_WED_DOWNLOAD_OFFSET2,&web_down_flag2,1);
+#endif
 
 				udelay(1000000);
 				write_dev_on_off(0x47);

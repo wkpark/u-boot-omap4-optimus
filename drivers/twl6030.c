@@ -5,7 +5,9 @@
 #include <charging_ic.h>
 #include <cosmo_muic.h>
 
+#ifdef CONFIG_LGE_NVDATA
 #include <lge_nvdata_emmc.h>
+#endif
 #include "max17043.h"
 #if defined (CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2)||defined(CONFIG_LGE_P2)
 #include "gpio_i2c.h"
@@ -487,10 +489,12 @@ void check_battery_temp_for_safe_charging_and_quick_start(int charging_mode, int
 
 	int tbat, vbat = 0, soc;
 	static u8 hw_cond = 0;
+#ifdef CONFIG_LGE_NVDATA
 	u8 temp_control = 0;
 
 	lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_CHARGING_TEMP_OFFSET , &temp_control, 1);
 	D("LGE_NVDATA_DYNAMIC_CHARGING_TEMP_OFFSET temp_control = %x", temp_control);
+#endif
 
 	twl6030_adc_setup();
 	twl6030_volt_setup();
@@ -498,7 +502,11 @@ void check_battery_temp_for_safe_charging_and_quick_start(int charging_mode, int
 	tbat = get_bat_temp();
 	D(" = %d, STS_PLUG_DET %d, %d", hw_cond , STS_PLUG_DET, (hw_cond & STS_PLUG_DET));
 
-	if( !is_temp_good(tbat) && (charging_mode != CHARGING_FACTORY) && (charging_mode != CHARGING_DEACTIVE) && (temp_control != LGE_NVDATA_DYNAMIC_CHARGING_TEMP_OFFSET) )
+	if( !is_temp_good(tbat) && (charging_mode != CHARGING_FACTORY)
+#ifdef CONFIG_LGE_NVDATA
+		&& (temp_control != LGE_NVDATA_DYNAMIC_CHARGING_TEMP_OFFSET)
+#endif
+		&& (charging_mode != CHARGING_DEACTIVE))
 	{
 		charging_mode = chr_ic_deactivation();
 	}
@@ -637,6 +645,7 @@ int charger_fsm(const int charger_type)
 		}
 
 		char reset_flag;
+#ifdef CONFIG_LGE_NVDATA
 		lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_RESET_CAUSE_OFFSET,&reset_flag,1);
 
 		printf("START_BY RESET code = %x",reset_flag);
@@ -657,8 +666,9 @@ int charger_fsm(const int charger_type)
 			goto GOTO_KERNEL;
 		}
 		else
+#endif /* CONFIG_LGE_NVDATA */
 		{		
-			
+#ifdef CONFIG_LGE_NVDATA
 			lge_dynamic_nvdata_emmc_read(LGE_NVDATA_DYNAMIC_SMPL_EN_OFFSET, &smpl_en, 1);	
 			if (smpl_en) { 
 				u8 vbat_low;
@@ -688,6 +698,7 @@ int charger_fsm(const int charger_type)
 					}
 				}
 			}
+#endif /* CONFIG_LGE_NVDATA */
 
 			if( ( 2 == *(volatile unsigned int*)(SCRM_APEWARMRSTST)) || reset_flag != 0)
 			{
@@ -695,6 +706,7 @@ int charger_fsm(const int charger_type)
 
 				goto GOTO_KERNEL;
 			}		
+
 			if( (hw_cond & STS_PLUG_DET) || \
 				 !(hw_cond & STS_PWRON) )
 

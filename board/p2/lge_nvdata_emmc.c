@@ -1,3 +1,4 @@
+#ifdef CONFIG_LGE_NVDATA
 #include <lge_nvdata_emmc.h>
 
 extern int mmc_init(int slot);
@@ -131,4 +132,4 @@ int lge_static_nvdata_emmc_write(enum lge_dynamic_nvdata_offset offset,char* buf
 
 	return size;
 }
-
+#endif

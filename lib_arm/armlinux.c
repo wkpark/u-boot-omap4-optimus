@@ -8,7 +8,9 @@
 #endif
 #include <bootimg.h>
 
+#ifdef CONFIG_LGE_NVDATA
 #include <lge_nvdata_emmc.h> 
+#endif
 DECLARE_GLOBAL_DATA_PTR;
 
 extern int do_reset (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
@@ -227,9 +229,11 @@ void do_bootm_linux (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[],
 	time = get_timer (0);
 	printf("uboot booting time = %u", time);
 	time = time / 150000;
+#ifdef CONFIG_LGE_NVDATA
 	printf(": saved value %u\n", time);
 	char time_ch = (char) time;
 	lge_dynamic_nvdata_emmc_write(LGE_NVDATA_DYNAMIC_UBOOT_TIME,&time_ch,1);
+#endif
 
 	printf ("\nStarting kernel ...\n\n");
 

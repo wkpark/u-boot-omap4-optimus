@@ -9,7 +9,9 @@
 
 #include <cosmo_muic.h>
 
+#ifdef CONFIG_LGE_NVDATA
 #include <lge_nvdata_emmc.h>
+#endif
 
 int cable_910K_detect=0;
 #ifdef CONFIG_COSMO_SU760
@@ -92,6 +94,7 @@ int muic_i2c_read_byte(unsigned char addr, unsigned char *value)
 	return i2c_read(MUIC_SLAVE_ADDR, (uint) addr, 1, value, 1);
 }
 
+#ifdef CONFIG_LGE_NVDATA
 void write_muic_mode_of_dload(unsigned char flag)
 {
 	lge_static_nvdata_emmc_write(LGE_NVDATA_STATIC_910K_DETECT_OFFSET,&flag, 1);
@@ -129,6 +132,12 @@ int read_muic_retain_mode(void)
 	else
 		return flag;
 }
+#else
+void write_muic_mode_of_dload(unsigned char flag) {}
+int read_muic_mode_of_dload(void) { return 0; }
+void write_muic_retain_mode(unsigned char flag) {}
+int read_muic_retain_mode(void) { return NO_RETAIN; }
+#endif
 
 static void check_charging_mode(MUIC_MODE_TYPE *mode)
 {
