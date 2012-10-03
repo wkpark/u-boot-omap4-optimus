@@ -4,6 +4,11 @@
 #include <common.h>
 #include <command.h>
 
+
+/* Use this as the scratchpad memory to communicate
+ * to bootloader from kernel for warm-reset cases
+ */
+#define PUBLIC_SAR_RAM_1_FREE  (0x4a326000 + 0xA0C)
   
 
 #define FASTBOOT_INTERFACE_CLASS     0xff
