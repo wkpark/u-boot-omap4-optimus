@@ -1323,7 +1323,7 @@ int do_booti (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 
 	if (argc > 2)
-		ptn = argv[3];
+		ptn = argv[2];
 
 	if (mmcc != -1) {
 #if (CONFIG_MMC)
