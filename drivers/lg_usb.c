@@ -111,8 +111,8 @@ int go_usbdownload (int x)
 	memset(usbtty_bulk_fifo, 0, (1024 * 1024 * 10));
 	l_size = 0;
 #else
-  g_nand_offs = (loff_t)NAND_OFFSET;
-  g_nand_len  = (int)NAND_LENGTH;
+	g_nand_offs = (loff_t)NAND_OFFSET;
+	g_nand_len  = (int)NAND_LENGTH;
 #endif
 	usbtty_init();
 	printf("USB Initialised \n");
@@ -126,8 +126,7 @@ int go_usbdownload (int x)
 	extern ulong get_timer_masked (void);
 	extern void reset_timer_masked (void);
 	
-#ifdef CONFIG_COSMO_SU760
-#else
+#ifndef CONFIG_COSMO_SU760
 	 extern int  download_start;
 #endif	
 	tmp = get_timer (0);		
@@ -142,13 +141,13 @@ int go_usbdownload (int x)
 #endif
 	
 	while(1){
-#if ! defined (CONFIG_LGE_CX2) 		
+#if ! defined(CONFIG_LGE_CX2) && ! defined(CONFIG_LGE_P2)
 		if (get_timer_masked () >= tmo && DownloadValid == 0)
 		{
 			usbtty_shutdown();
 			return;
 		}
-#endif	
+#endif
 					
 		poll_status = poll_usbtty();
 	
@@ -160,33 +159,31 @@ int go_usbdownload (int x)
 			printf("USBtty Reinitialised\n");
 		}
 
-extern int web_download_mode;
+		extern int web_download_mode;
 
-if(web_download_mode!=1) 
-{
-#if ! defined (CONFIG_LGE_CX2) 	
-
-		time++;
-		if(poll_status == 0)
-			flag =1;
- 						
-		if((poll_status != 0)&&(time>1000000)&&(flag ==0))
+		if(web_download_mode!=1)
 		{
-			printf("pool_status = %d\n",poll_status);
-			return 1;
+#if ! defined(CONFIG_LGE_CX2) && ! defined(CONFIG_LGE_P2)
+
+			time++;
+			if(poll_status == 0)
+				flag =1;
+
+			if((poll_status != 0)&&(time>1000000)&&(flag ==0))
+			{
+				printf("pool_status = %d\n",poll_status);
+				return 1;
+			}
+#ifndef CONFIG_COSMO_SU760
+			if((poll_status != 0)&&(x==1)&&(download_start != 1) &&(time>250000) )
+				return 1;
+#endif
+#endif
 		}
-#ifdef CONFIG_COSMO_SU760
-#else
-		if((poll_status != 0)&&(x==1)&&(download_start != 1) &&(time>250000) )
-			return 1;
-#endif
-#endif
-		
-} 
 #ifdef CONFIG_LGE_USB
-    Main_Event_Process();
+		Main_Event_Process();
 #endif
-	}	
+	}
 }
 
 int usbtty_fifo_size(void)
