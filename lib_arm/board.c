@@ -767,7 +767,7 @@ void start_armboot (void)
 	if(recoverykey() || isFactoryReset || isHardReset) {
 		printf("\n### ==============fota mode ==============###\n"); 
 #if defined (CONFIG_LGE_P2)
-		setenv("bootcmd", "mmcinit 1; mmc 1 read 0x5800 0x81000000 0xA00000; bootm 81000000");
+		setenv("bootcmd", "mmcinit 1; mmc 1 read 0x3c00 0x81000000 0xA00000; booti 0x81000000");
 #elif defined (CONFIG_LGE_CX2)
 #if defined (CONFIG_CX2_SU870)
 		setenv("bootcmd", "mmcinit 1; mmc 1 read 0x5800 0x81000000 0xA00000; bootm 81000000");
@@ -788,8 +788,6 @@ void start_armboot (void)
 #endif
 
 #if 0
-	/* for boot */
-	//setenv("bootcmd", "mmcinit 1; mmc 1 read 0xc00 0x81000000 0xA00000; booti 0x81000000");
 	/* for recovery */
 	setenv("bootcmd", "mmcinit 1; mmc 1 read 0x3c00 0x81000000 0xA00000; bootm 0x81000000");
 	setenv("bootargs",
