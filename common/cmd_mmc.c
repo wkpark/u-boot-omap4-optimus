@@ -3,7 +3,7 @@
 
 #if (CONFIG_COMMANDS & CFG_CMD_MMC)
 
-#ifdef FEATURE_LGE_FOTA_UBOOT
+#ifdef CONFIG_LGE_FOTA_FEATURE
 #include	"lge_fota_std.h"
 #include	"oem_usd.h"
 #endif
@@ -47,9 +47,11 @@ int do_mmc (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		cmd = argv[2];
                 if (strncmp(cmd, "read", 4) != 0 && 
                 	strncmp(cmd, "write", 5) != 0 && 
-                    strncmp(cmd, "erase", 5) != 0 &&
+#ifdef CONFIG_LGE_FOTA_FEATURE
+			strncmp(cmd, "loadimage", 9) != 0 &&
+#endif
+                    strncmp(cmd, "erase", 5) != 0)
 
-					strncmp(cmd, "loadimage", 9) != 0)
 
                 goto mmc_cmd_usage;
 
@@ -85,7 +87,7 @@ int do_mmc (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			}
 		}
 
-#ifdef FEATURE_LGE_FOTA_UBOOT
+#ifdef CONFIG_LGE_FOTA_FEATURE
 		if (strcmp(cmd, "loadimage") == 0)
 		{
 			sUpdateStatus	*mUSD;
@@ -147,7 +149,7 @@ U_BOOT_CMD(mmcinit, 6, 1, do_mmc,
 	"mmc <controller[0/1]> read <src> <dst> <size>\n"
 	"mmc <controller[0/1]> write <src> <dst> <size>\n"
 	"mmc <controller[0/1]> erase <start> <size>\n"
-#ifdef FEATURE_LGE_FOTA_UBOOT
+#ifdef CONFIG_LGE_FOTA_FEATURE
 	"mmc <controller[0/1]> loadimage\n"
 #endif
 	);
