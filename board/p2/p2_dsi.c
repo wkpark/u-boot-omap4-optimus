@@ -7,7 +7,8 @@
 #include <linux/mtd/compat.h>
 #include "p2_dss.h"
 
-#include "lg_logo_data.h"
+//#include "lg_logo_data.h"
+#include "logo.h"
 #include "font8x8.h"
 #include "font8x16.h"
 #include "web_download.h"
@@ -2197,19 +2198,15 @@ int dsi2_init(void)
 	return 0;
 }
 
-void cosmo_panel_emergency_logo_draw()
+void panel_logo_draw(unsigned short *src_ptr)
 {
-#ifdef CONFIG_COSMO_SU760
-	unsigned short* src_ptr = (unsigned short*)web_download;
-#else
-	unsigned short* src_ptr = (unsigned short*)web_download_eng;
-#endif
 	unsigned int* dest_ptr = (int *)0x87000000;
 	unsigned short size;
 	unsigned short value;
 	int length = LCD_XRES*LCD_YRES;
 	unsigned char red, green, blue;
 
+	memset(dest_ptr, 0x00000000, 4 * LCD_XRES * LCD_YRES);
 	while (length > 0) {
 		size = *src_ptr;
 		src_ptr++;
@@ -2226,8 +2223,22 @@ void cosmo_panel_emergency_logo_draw()
 	}
 }
 
+
+void cosmo_panel_emergency_logo_draw()
+{
+#ifdef CONFIG_COSMO_SU760
+	unsigned short* src_ptr = (unsigned short*)web_download;
+#else
+	unsigned short* src_ptr = (unsigned short*)web_download_eng;
+#endif
+	panel_logo_draw(src_ptr);
+}
+
 void cosmo_panel_logo_draw()
 {
+	unsigned short* src_ptr = (unsigned short*)lglogo;
+	panel_logo_draw(src_ptr);
+#if 0
 	u32 *ptr;
 	u32 y;
 	u32 x;
@@ -2257,6 +2268,7 @@ void cosmo_panel_logo_draw()
 		}
 		ptr += (LCD_XRES-COSMO_LOGO_WIDTH);
 	}
+#endif
 }
 	
 void cosmo_draw_char(u32* pFB,int x, int y, char ch)
