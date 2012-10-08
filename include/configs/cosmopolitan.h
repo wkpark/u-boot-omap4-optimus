@@ -37,6 +37,9 @@
 
 #define CONFIG_COSMOPOLITAN      1
 
+#define CONFIG_LGE_WEB_DOWNLOAD  1
+//#define CONFIG_LGE_FOTA_FEATURE  1
+#define CONFIG_LGE_NVDATA        1
  
 #if defined(CONFIG_BOOT_DEVICE_EMMC)
 #define CFG_ENV_SIZE             SZ_128K    
@@ -146,7 +149,11 @@
 #define EMMC_INITRD_BASE_SEC		0x00002400
 #define EMMC_RECOVERY_BASE_SEC		0x00004C00
 
+#ifdef CONFIG_LGE_FOTA_FEATURE
 #define CONFIG_BOOTCOMMAND	"mmcinit 1; mmc 1 loadimage; bootm 81000000\0"
+#else
+#define CONFIG_BOOTCOMMAND	"mmcinit 1; booti mmc1 boot\0"
+#endif
 
 #endif 
 
