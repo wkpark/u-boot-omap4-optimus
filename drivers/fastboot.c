@@ -20,11 +20,12 @@
 
 #if defined(CONFIG_FASTBOOT)
 
-#if 1 
 #define OTG_SYSCONFIG 0x4A0AB404
 #define OTG_INTERFSEL 0x4A0AB40C
 #define USBOTGHS_CONTROL 0x4A00233C
-#endif
+#define CONTROL_DEV_CONF 0x4A002300
+
+#define USBPHY_PD 0x1
 
 #include "usb_debug_macros.h"
 
@@ -58,6 +59,7 @@ static volatile u32 *otg_interfsel	= (volatile u32 *) OMAP34XX_OTG_INTERFSEL;
 static volatile u32 *otg_forcestdby	= (volatile u32 *) OMAP34XX_OTG_FORCESTDBY;
 static volatile u32 *otghs_control = (volatile u32  *)USBOTGHS_CONTROL;
 #endif
+static volatile u32 *control_dev_conf = (volatile u32  *)CONTROL_DEV_CONF;
 
 #define DEVICE_VENDOR_ID  0x0451
 
@@ -79,8 +81,8 @@ static volatile u32 *otghs_control = (volatile u32  *)USBOTGHS_CONTROL;
 #define DEVICE_STRING_MANUFACTURER_INDEX  5
 #define DEVICE_STRING_PROC_REVISION       6
 #define DEVICE_STRING_PROC_TYPE           7
-#define DEVICE_STRING_MAX_INDEX           DEVICE_STRING_MANUFACTURER_INDEX
-#define DEVICE_STRING_LANGUAGE_ID         0x0409 
+#define DEVICE_STRING_MAX_INDEX           DEVICE_STRING_PROC_TYPE
+#define DEVICE_STRING_LANGUAGE_ID         0x0409 /* English (United States) */
 
 #define RX_ENDPOINT_MAXIMUM_PACKET_SIZE_2_0  (0x0200)
 #define RX_ENDPOINT_MAXIMUM_PACKET_SIZE_1_1  (0x0040)
@@ -937,6 +939,9 @@ int fastboot_poll(void)
 		}
 		if (intrusb & OMAP34XX_USB_INTRUSB_SUSPEND)
 		{
+			/* USB cable disconnected, reset faddr */
+			faddr = 0xff;
+
 			ret = fastboot_suspend ();
 			if (ret)
 				return ret;
@@ -1111,6 +1116,7 @@ int fastboot_init(struct cmd_fastboot_interface *interface)
 	u8 devctl;
 	int cpu_rev = 0;
 	int cpu_type = 0;
+	u32 usb_phy_power_down;
 
 	device_strings[DEVICE_STRING_MANUFACTURER_INDEX]  = "Texas Instruments";
 #if defined (CONFIG_3430ZOOM2)
@@ -1210,7 +1216,16 @@ int fastboot_init(struct cmd_fastboot_interface *interface)
 	
 	*otg_sysconfig = (0x1008);
 
-	if (*otghs_control != 0x15) {
+	usb_phy_power_down = *control_dev_conf & USBPHY_PD;
+
+	if(usb_phy_power_down)
+	{
+		 // poweron usb phy
+		 *control_dev_conf &= ~USBPHY_PD;
+		 udelay(200000);
+	}
+
+	if ((*otghs_control != 0x15) || usb_phy_power_down) {
 		fastboot_reset();
 
 #if 1 
