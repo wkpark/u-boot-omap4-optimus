@@ -1060,13 +1060,24 @@ int fastboot_preboot(void)
 
 #endif
 
-	if (__raw_readl(PRM_RSTST) & PRM_RSTST_RESET_WARM_BIT) {
+#ifdef CONFIG_LGE_P2
+	{
+		/* bootloader hack */
+		unsigned int reason;
+		reason = *((unsigned int *) PUBLIC_SAR_RAM_1_FREE);
+		if (reason == 0x77665500)
+			return 1;
+	}
+#endif
 
+	if (__raw_readl(PRM_RSTST) & PRM_RSTST_RESET_WARM_BIT) {
+		unsigned int reason;
 		printf("\n reboot command [%s]\n", PUBLIC_SAR_RAM_1_FREE);
 		/* Warm reset case:
 		* %adb reboot recovery
 		*/
-		if (!strcmp(PUBLIC_SAR_RAM_1_FREE, "recovery")) {
+		reason = *((unsigned int *) PUBLIC_SAR_RAM_1_FREE);
+		if (reason == 0x77665502 || !strcmp(PUBLIC_SAR_RAM_1_FREE, "recovery")) {
 
 			printf("\n Case: \%reboot recovery\n");
 start_recovery:
@@ -1096,7 +1107,7 @@ start_recovery:
 			return 0;
 		} else if (!strcmp(PUBLIC_SAR_RAM_1_FREE, "off")) {
 			fastboot_shutdown();
-		} else if (!strcmp(PUBLIC_SAR_RAM_1_FREE, "bootloader")) {
+		} else if (reason == 0x77665500 || !strcmp(PUBLIC_SAR_RAM_1_FREE, "bootloader")) {
 			/* Warm reset case
 			 * Case: %fastboot reboot-bootloader
 			 * Case: %adb reboot bootloader
@@ -1107,7 +1118,7 @@ start_recovery:
 		return 0;
 	}
 #endif
-	return 1;
+	return 0;
 }
 
 int fastboot_init(struct cmd_fastboot_interface *interface) 
