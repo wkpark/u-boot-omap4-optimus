@@ -129,7 +129,8 @@ int	do_keyscan(int force_rescan)
 	__raw_writew(r0, PADCONF_KEY_R0);	
 	__raw_writew(r1, PADCONF_KEY_R1);	
 
-	scanned	=	1;
+	if (force_rescan != 2)
+		scanned	= 1;
 
 	return	scancode;
 }
