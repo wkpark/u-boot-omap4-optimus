@@ -84,7 +84,7 @@ static	int		_downloadkey;
 #define KEY_VOLUMEDOWN		0x0002
 #define KEY_3DHOT			0x0004
 
-static int	do_keyscan(int force_rescan)
+int	do_keyscan(int force_rescan)
 {
 	static int		scanned	=	0;
 	static int		scancode;
@@ -110,10 +110,12 @@ static int	do_keyscan(int force_rescan)
 	omap_set_gpio_direction(GPIO_KEY_R0, 1);	
 	omap_set_gpio_direction(GPIO_KEY_R1, 1);
 
+#if !defined(CONFIG_LGE_P2)
 	omap_set_gpio_dataout(GPIO_KEY_C0, 1);
 	omap_set_gpio_dataout(GPIO_KEY_C1, 0);
 	if (!omap_get_gpio_datain(GPIO_KEY_R1))
 		scancode	|=	KEY_3DHOT;
+#endif
 
 	omap_set_gpio_dataout(GPIO_KEY_C0, 0);
 	omap_set_gpio_dataout(GPIO_KEY_C1, 1);
@@ -155,47 +157,12 @@ int isVolumeDownKeyPressed(void){
 
 int trap_exit_key(void)
 {
-
-	int scancode;
-	short	c0, c1, r0, r1;
-	
-	scancode	=	0;
-
-	c0	=	__raw_readw(PADCONF_KEY_C0);	
-	c1	=	__raw_readw(PADCONF_KEY_C1);	
-	r0	=	__raw_readw(PADCONF_KEY_R0);	
-	r1	=	__raw_readw(PADCONF_KEY_R1);	
-
-	__raw_writew(M3,				PADCONF_KEY_C0);	
-	__raw_writew(M3,				PADCONF_KEY_C1);	
-	__raw_writew(PTU | IEN | M3,	PADCONF_KEY_R0);	
-	__raw_writew(PTU | IEN | M3,	PADCONF_KEY_R1);	
-
-	omap_set_gpio_direction(GPIO_KEY_C0, 0);	
-	omap_set_gpio_direction(GPIO_KEY_C1, 0);
-	omap_set_gpio_direction(GPIO_KEY_R0, 1);	
-	omap_set_gpio_direction(GPIO_KEY_R1, 1);
-
-	omap_set_gpio_dataout(GPIO_KEY_C0, 1);
-	omap_set_gpio_dataout(GPIO_KEY_C1, 0);
-	if (!omap_get_gpio_datain(GPIO_KEY_R1))
-		scancode	|=	KEY_3DHOT;
-
-	omap_set_gpio_dataout(GPIO_KEY_C0, 0);
-	omap_set_gpio_dataout(GPIO_KEY_C1, 1);
-	if (!omap_get_gpio_datain(GPIO_KEY_R0))
-		scancode	|=	KEY_VOLUMEUP;
-	if (!omap_get_gpio_datain(GPIO_KEY_R1))
-		scancode	|=	KEY_VOLUMEDOWN;
-
-	__raw_writew(c0, PADCONF_KEY_C0);	
-	__raw_writew(c1, PADCONF_KEY_C1);	
-	__raw_writew(r0, PADCONF_KEY_R0);	
-	__raw_writew(r1, PADCONF_KEY_R1);	
-
-	return	(scancode == KEY_3DHOT);
 	int key = do_keyscan(1);
+#if defined(CONFIG_LGE_P2)
+	return	(key == KEY_VOLUMEDOWN);
+#else
 	return	(key == KEY_3DHOT);
+#endif
 }
 
 #define		OMAP44XX_WKUP_CTRL_BASE		0x4A31E000
