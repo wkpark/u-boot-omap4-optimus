@@ -35,6 +35,8 @@
  */
 
 #include <common.h>
+#ifdef CONFIG_FBCON
+
 #include "fbcon.h"
 #include "font5x12.h"
 
@@ -208,3 +210,5 @@ struct fbcon_config* fbcon_display(void)
 {
     return config;
 }
+
+#endif
