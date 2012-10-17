@@ -223,6 +223,7 @@ static int load_ptbl(void)
 	return 0;
 }
 
+#if 0
 struct partition {
 	const char *name;
 	unsigned size_kb;
@@ -285,16 +286,21 @@ static int do_format(void)
 
 	return 0;
 }
+#endif
+
 int fastboot_oem(const char *cmd)
 {
+#if 0
 	if (!strcmp(cmd,"format"))
 		return do_format();
+#endif
 	return -1;
 }
 
 
 void board_mmc_init(void)
 {
+#if 0
 #if (CONFIG_FASTBOOT)
 
 	/* Partitons on EMMC preasent on OMAP4SDP required for Fastboot*/
@@ -365,4 +371,25 @@ void board_mmc_init(void)
 	for (i = 0; i < 10; i++)
 		fastboot_flash_add_ptn(&ptn[i]);
 #endif
+#endif
+}
+
+int omap4_mmc_init(void)
+{
+	int i;
+	int mmc_slot = 1;
+#if 0
+	char booticmd[20];
+#endif
+
+	if (mmc_init(mmc_slot)) {
+		printf("mmc init failed?\n");
+		return 1;
+	}
+#if 0
+	sprintf(booticmd, "booti mmc%d", mmc_slot);
+	setenv("bootcmd", booticmd);
+#endif
+	printf("efi partition table:\n");
+	return load_ptbl();
 }

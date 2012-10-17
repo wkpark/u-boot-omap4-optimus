@@ -49,6 +49,21 @@ int board_init(void)
 	return 0;
 }
 
+/*****************************************
+ * Routine: board_late_init
+ * Description: Late hardware init.
+ * *****************************************/
+int board_late_init(void)
+{
+        int status;
+
+        /* mmc */
+        if( (status = omap4_mmc_init()) != 0) {
+                return status;
+        }
+	return 0;
+}
+
 int get_boot_type(void);
 void v7_flush_dcache_all(int , int);
 void setup_auxcr(int , int);
