@@ -38,7 +38,11 @@
 #ifdef CONFIG_FBCON
 
 #include "fbcon.h"
+#ifdef USE_FONT5x12
 #include "font5x12.h"
+#else
+#include "font10x18.h"
+#endif
 
 struct pos {
 	int x;
@@ -50,8 +54,45 @@ static struct fbcon_config *config = NULL;
 #define RGB8888_BLACK	0xff000000
 #define RGB8888_WHITE	0xffffffff
 
+#ifdef USE_FONT5x12
 #define FONT_WIDTH	5
 #define FONT_HEIGHT	12
+#else
+#define FONT_WIDTH	10
+#define FONT_HEIGHT	18
+
+unsigned char *font_data = NULL;
+#endif
+
+#ifndef USE_FONT5x12
+void init_font(void)
+{
+	unsigned short size;
+	unsigned short value;
+	int length = MYFONT_WIDTH * MYFONT_HEIGHT;
+	unsigned char bit;
+	unsigned char* src_ptr = myfont;
+	unsigned char* dest_ptr = font_data;
+
+	if (font_data)
+		return;
+
+	font_data = malloc(length * sizeof(char));
+	dest_ptr = font_data;
+	while (length > 0) {
+		size = *src_ptr;
+		src_ptr++;
+		value = *src_ptr;
+		src_ptr++;
+		while(size--) {
+			bit = value & 0xFF;
+			*dest_ptr = bit;
+			dest_ptr++;
+			length--;
+		}
+	}
+}
+#endif
 
 static uint32_t			BGCOLOR;
 static uint32_t			FGCOLOR;
@@ -59,6 +100,7 @@ static uint32_t			FGCOLOR;
 static struct pos		cur_pos;
 static struct pos		max_pos;
 
+#ifdef USE_FONT5x12
 static void fbcon_drawglyph(uint32_t *pixels, uint32_t paint, unsigned stride,
 			    unsigned *glyph)
 {
@@ -87,6 +129,41 @@ static void fbcon_drawglyph(uint32_t *pixels, uint32_t paint, unsigned stride,
 		pixels += stride;
 	}
 }
+#else
+static void fbcon_drawglyph(uint32_t paint, char c)
+{
+	uint32_t *framebuffer = config->base;
+	uint32_t i, j, pixel;
+	int num_chars = 96;
+	int off = c - 32;
+        uint32_t x = cur_pos.x * (FONT_WIDTH + 1);
+        uint32_t y = cur_pos.y * FONT_HEIGHT;
+	uint32_t r, g, b;
+
+	paint = 0x33ccff;
+
+	r = paint & 0xff0000;
+	g = paint & 0x00ff00;
+	b = paint & 0x0000ff;
+
+	for (i = 0; i < FONT_HEIGHT; i++) {
+		for (j = 0; j < FONT_WIDTH; j++) {
+			/* Get the pixel in font */
+			uint8_t bit = font_data[(i * num_chars * FONT_WIDTH) + (off * FONT_WIDTH) + j];
+
+			/* Get the pixel in the frame */
+			pixel = ((y + i) * config->width + (x + j));
+#if 0
+			framebuffer[pixel  ] = (uint8_t)(((b->R * (255 - p)) + (c->R * p)) / 255);
+			framebuffer[pixel+1] = (uint8_t)(((b->G * (255 - p)) + (c->G * p)) / 255);
+			framebuffer[pixel+2] = (uint8_t)(((b->B * (255 - p)) + (c->B * p)) / 255);
+#else
+			framebuffer[pixel] = (0xFF << 24) | (bit << 16) & r | (bit << 8) & g | bit & b;
+#endif
+		}
+	}
+}
+#endif
 
 static void fbcon_flush(void)
 {
@@ -154,11 +231,15 @@ void fbcon_putc(char c)
 		return;
 	}
 
+#ifdef USE_FONT5x12
 	pixels = config->base;
 	pixels += cur_pos.y * FONT_HEIGHT * config->width;
 	pixels += cur_pos.x * (FONT_WIDTH + 1);
 	fbcon_drawglyph(pixels, FGCOLOR, config->stride,
 			font5x12 + (c - 32) * 2);
+#else
+	fbcon_drawglyph(FGCOLOR, c);
+#endif
 
 	cur_pos.x++;
 	if (cur_pos.x < max_pos.x)
@@ -203,6 +284,9 @@ void fbcon_setup(struct fbcon_config *_config)
 	max_pos.x = config->width / (FONT_WIDTH+1);
 	max_pos.y = (config->height - 1) / FONT_HEIGHT;
 
+#ifndef USE_FONT5x12
+	init_font();
+#endif
 	//fbcon_clear();
 }
 

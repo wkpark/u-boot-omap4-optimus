@@ -51,7 +51,7 @@ OBJS	= 3c589.o 5701rls.o ali512x.o \
 	  ks8695eth.o smsc9118.o \
 	  pxa_pcmcia.o mpc8xx_pcmcia.o tqm8xx_pcmcia.o	\
 	  rpx_pcmcia.o fastboot.o ks885x_interface.o	\
-	  lg_usb.o lg_download.o
+	  lg_usb.o lg_download.o fbcon.o
 ifeq ($(HWVER),rev_1.0)
 OBJS	+= max17043.o
 endif
