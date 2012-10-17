@@ -213,7 +213,7 @@ int             DownloadValid = 0;
 
 #define GPIO_LCD_EN		27
 
-#if defined (CONFIG_LGE_CX2) || defined (CONFIG_LGE_P2)
+#ifdef CONFIG_FBCON
 static struct fbcon_config fb_cfg = {
 	.base = 0x87000000,
 	.width = 480,
@@ -224,7 +224,9 @@ static struct fbcon_config fb_cfg = {
 	.update_start = NULL,
 	.update_done = NULL,
 };
+#endif
 
+#if defined (CONFIG_LGE_CX2) || defined (CONFIG_LGE_P2)
 void lcd_init(void)
 {
 	unsigned char	data_for_lcd;
