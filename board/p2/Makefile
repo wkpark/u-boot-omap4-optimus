@@ -28,7 +28,7 @@ include $(TOPDIR)/config.mk
 LIB	= lib$(BOARD).a
 
 OBJS	:= p2.o mem.o syslib.o sys_info.o clock.o mmc.o spi.o p2_muic.o gpio.o ifx.o charging_ic.o \
-	   p2_dispc.o p2_dsi.o lge_nvdata_emmc.o sparse.o omap4.o fbcon.o
+	   p2_dispc.o p2_dsi.o lge_nvdata_emmc.o sparse.o omap4.o
 SOBJS	:= lowlevel_init.o
 
 $(LIB):	$(OBJS) $(SOBJS)
