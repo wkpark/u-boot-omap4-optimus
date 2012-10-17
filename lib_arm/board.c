@@ -22,10 +22,8 @@
 #ifdef CONFIG_DRIVER_LAN91C96
 #include "../drivers/lan91c96.h"
 #endif
-#if defined (CONFIG_LGE_CX2) 
-#include "../board/cx2/fbcon.h"
-#elif defined (CONFIG_LGE_P2)
-#include "../board/p2/fbcon.h"
+#ifdef CONFIG_FBCON
+#include "../drivers/fbcon.h"
 #endif
 
 #include <twl6030.h>
@@ -312,8 +310,13 @@ void	lcd_init()
 
 extern int dsi2_init(void);
 extern void dispc_enable_lcd_out(bool);
-void init_panel()
+void init_panel(int force)
 {
+	static int initialized = 0;
+
+	if (!force && initialized)
+		return;
+
 #if defined (CONFIG_LGE_CX2)
 	unsigned char maker_id;
 #endif
@@ -545,6 +548,11 @@ u8 lgd_lcd_command_for_mipi[][30] = {
 	u8 buf;
 	buf = DCS_SLEEP_OUT;
 	dsi_vc_dcs_write(1,TCH, &buf, 1);
+
+#ifdef CONFIG_FBCON
+	fbcon_setup(&fb_cfg);
+#endif
+	initialized = 1;
 }
 
 void start_armboot (void)
@@ -981,7 +989,7 @@ void start_armboot (void)
 	eth_initialize(gd->bd);
 #endif
 
-	init_panel();
+	init_panel(0);
 
 #ifdef CONFIG_LGE_TRAP
 	char trap_flag;
@@ -1065,9 +1073,6 @@ void start_armboot (void)
 	dispc_go(OMAP_DSS_CHANNEL_LCD2);
 
 	dispc_enable_lcd_out(1);
-#if defined (CONFIG_LGE_CX2) || defined (CONFIG_LGE_P2)
-	fbcon_setup(&fb_cfg);
-#endif
 
 #ifdef CONFIG_LGE_TRAP
 	extern int trap_exit_key(void);
@@ -1154,7 +1159,7 @@ void download_logo(int download_mode)
 {
 	enable_interrupts ();
 
-	init_panel();
+	init_panel(0);
 
 #ifdef CONFIG_COSMO_SU760
 	cosmo_panel_emergency_logo_draw();
