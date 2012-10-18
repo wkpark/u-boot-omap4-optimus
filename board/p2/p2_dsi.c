@@ -7,11 +7,11 @@
 #include <linux/mtd/compat.h>
 #include "p2_dss.h"
 
-//#include "lg_logo_data.h"
-#include "logo.h"
 #include "font8x8.h"
 #include "font8x16.h"
-#include "web_download.h"
+extern char const lglogo[];
+extern char const web_download[];
+extern char const web_download_eng[];
 
 #define DEBUG_DSI_VIDEO_MODE
 
