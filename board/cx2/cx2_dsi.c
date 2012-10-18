@@ -7,11 +7,13 @@
 #include <linux/mtd/compat.h>
 #include "cx2_dss.h"
 
-//#include "lg_logo_data.h"
-#include "logo.h"
+#ifndef CONFIG_FBCON
 #include "font8x8.h"
 #include "font8x16.h"
-#include "web_download.h"
+#endif
+extern char const lglogo[];
+extern char const web_download[];
+extern char const web_download_eng[];
 
 #define DEBUG_DSI_VIDEO_MODE
 
@@ -2270,7 +2272,8 @@ void cosmo_panel_logo_draw()
 	}
 #endif
 }
-	
+
+#ifndef CONFIG_FBCON
 void cosmo_draw_char(u32* pFB,int x, int y, char ch)
 {
 	int font_y,font_x;
@@ -2472,6 +2475,7 @@ void cosmo_draw_dl_text(u32* pFB, int line, char* str,int str_len,int mode)
 		cosmo_draw_download_char(pFB,x*20,line*20,str[x],mode);
 	}
 }
+#endif
 
 void cosmo_panel_download_logo_draw(int mode)
 {
@@ -2479,6 +2483,21 @@ void cosmo_panel_download_logo_draw(int mode)
 	
 	ptr = (int *)0x87000000;
 
+#ifdef CONFIG_FBCON
+	if(mode == 0) {
+		memset(ptr, 0x00, 4*LCD_XRES*LCD_YRES);
+
+		fbcon_puts("  S/W Upgrade");
+		fbcon_puts("  Please wait");
+		fbcon_puts("  while upgrading...");
+	} else if(mode == 2) {
+		fbcon_puts(" Connect the USB cable");
+		fbcon_puts(" for SW updating..");
+	} else {
+		memset(ptr, 0xFF, 4*LCD_XRES*LCD_YRES);
+		fbcon_puts("Factory Download");
+	}
+#else
 	if(mode == 0)
 	{
 		memset(ptr,0x00,4*LCD_XRES*LCD_YRES);
@@ -2499,4 +2518,5 @@ void cosmo_panel_download_logo_draw(int mode)
 		memset(ptr,0xFF,4*480*800);				
 		cosmo_draw_dl_text(ptr,20,"Factory Download",52 ,mode);
 	}
+#endif
 }
