@@ -1,6 +1,6 @@
 #define FONTDATAMAX_8x16 4096
 
-static const unsigned char fontdata_8x16[FONTDATAMAX] = {
+static const unsigned char fontdata_8x16[FONTDATAMAX_8x16] = {
 
 	0x00, 
 	0x00, 
