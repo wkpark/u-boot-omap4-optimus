@@ -28,11 +28,20 @@ include $(TOPDIR)/config.mk
 LIB	= lib$(BOARD).a
 
 OBJS	:= cosmopolitan.o mem.o syslib.o sys_info.o clock.o mmc.o spi.o cosmo_muic.o gpio.o ifx.o charging_ic.o \
-	   cosmo_dispc.o cosmo_dsi.o lge_nvdata_emmc.o sparse.o omap4.o
+	   cosmo_dispc.o cosmo_dsi.o lge_nvdata_emmc.o sparse.o omap4.o lglogo.o web_download.o
 SOBJS	:= lowlevel_init.o
 
 $(LIB):	$(OBJS) $(SOBJS)
 	$(AR) crv $@ $^
+
+lglogo.o:
+	$(OBJCOPY) -I binary -O elf32-littlearm -B arm --redefine-sym _binary_$(patsubst %.o,%_rle_start,$@)=$(patsubst %.o,%,$@) $(patsubst %.o,%.rle,$@) $@
+
+web_download.o:
+	$(OBJCOPY) -I binary -O elf32-littlearm -B arm --redefine-sym _binary_$(patsubst %.o,%_rle_start,$@)=$(patsubst %.o,%,$@) $(patsubst %.o,%.rle,$@) $@
+
+web_download_eng.o:
+	$(OBJCOPY) -I binary -O elf32-littlearm -B arm --redefine-sym _binary_$(patsubst %.o,%_rle_start,$@)=$(patsubst %.o,%,$@) $(patsubst %.o,%.rle,$@) $@
 
 clean:
 	rm -f $(SOBJS) $(OBJS)
