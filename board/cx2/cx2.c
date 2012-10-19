@@ -84,7 +84,7 @@ static	int		_downloadkey;
 #define KEY_VOLUMEDOWN		0x0002
 #define KEY_3DHOT			0x0004
 
-static int	do_keyscan(int force_rescan)
+int	do_keyscan(int force_rescan)
 {
 	static int		scanned	=	0;
 	static int		scancode;
@@ -127,6 +127,7 @@ static int	do_keyscan(int force_rescan)
 	__raw_writew(r0, PADCONF_KEY_R0);	
 	__raw_writew(r1, PADCONF_KEY_R1);	
 
+	if (force_rescan != 2)
 	scanned	=	1;
 
 	return	scancode;
