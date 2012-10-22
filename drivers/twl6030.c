@@ -9,7 +9,7 @@
 #include <lge_nvdata_emmc.h>
 #endif
 #include "max17043.h"
-#if defined (CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2)||defined(CONFIG_LGE_P2)
+#if defined (CONFIG_COSMO_REV_11)||defined(CONFIG_LGE_CX2) 
 #include "gpio_i2c.h"
 #endif
 
@@ -512,7 +512,7 @@ void check_battery_temp_for_safe_charging_and_quick_start(int charging_mode, int
 	}
 	hw_cond = read_current_hw_condition();
 
-#if defined (CONFIG_COSMO_REV_10) || defined (CONFIG_COSMO_REV_11)|| defined(CONFIG_LGE_CX2) || defined(CONFIG_LGE_P2)
+#if defined (CONFIG_COSMO_REV_10) || defined (CONFIG_COSMO_REV_11)|| defined(CONFIG_LGE_CX2) 
 
 	max17043_init();
 	max17043_set_rcomp_with_temp(tbat);
