@@ -1407,8 +1407,14 @@ int do_booti (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	serial_len = sprintf(serial_str, " androidboot.serialno=%08X%08X",
 			val[1], val[0]);
 
+#if 0
 	if(sizeof(hdr->cmdline) >= (serial_len + strlen(hdr->cmdline) + 1))
 		strcat(hdr->cmdline, serial_str);
+#else
+	char buff[256];
+	sprintf(buff, "%s %s", getenv("bootargs"), serial_str);
+	setenv("bootargs", buff);
+#endif
 #endif
 
 	do_booti_linux(hdr);
