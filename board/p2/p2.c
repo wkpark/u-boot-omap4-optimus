@@ -194,8 +194,10 @@ int trap_exit_key(void)
 #define		CP(x)	(CONTROL_PADCONF_##x)
 #define		WK(x)	(CONTROL_WKUP_##x)
 
-#if defined(CONFIG_LGE_P2) && defined(CONFIG_P2_SU540)
+#if defined(CONFIG_LGE_P2) && defined(CONFIG_P2_REV_A)
 #include "mux_su540.h" 
+#elif defined (CONFIG_LGE_P2) && defined(CONFIG_P2_REV_B)
+#include "mux_p940.h"
 #endif
 
 void set_muxconf_regs(void)

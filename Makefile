@@ -2048,6 +2048,18 @@ p2_default_config : unconfig
 		echo "#define CONFIG_COSMO_MIPI_HSI 1" >> ./include/config.h ;\
 	fi
 	@./mkconfig -a p2 arm omap4 p2
+
+p940_config \
+p2_rev_b_config \
+p940_default_config : unconfig
+	@if [ "$(findstring p2, $@)" ] ; then \
+		echo "#define CONFIG_P2_REV_B 1" >> ./include/config.h ;\
+		echo "#define CONFIG_P2_P940 1" >> ./include/config.h ;\
+	fi;
+	@if [ "$(findstring _mipi, $@)" ] ; then \
+		echo "#define CONFIG_COSMO_MIPI_HSI 1" >> ./include/config.h ;\
+	fi
+	@./mkconfig -a p2 arm omap4 p2
 #========================================================================
 # i386
 #========================================================================
