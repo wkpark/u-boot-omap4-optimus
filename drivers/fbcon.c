@@ -136,15 +136,14 @@ static void fbcon_drawglyph(uint32_t paint, char c)
 	uint32_t i, j, pixel;
 	int num_chars = 96;
 	int off = c - 32;
-        uint32_t x = cur_pos.x * (FONT_WIDTH + 1);
+        uint32_t x = cur_pos.x * FONT_WIDTH;
         uint32_t y = cur_pos.y * FONT_HEIGHT;
-	uint32_t r, g, b;
-
-	paint = 0x33ccff;
+	uint32_t r, g, b, bg;
 
 	r = paint & 0xff0000;
 	g = paint & 0x00ff00;
 	b = paint & 0x0000ff;
+	bg = BGCOLOR;
 
 	for (i = 0; i < FONT_HEIGHT; i++) {
 		for (j = 0; j < FONT_WIDTH; j++) {
@@ -158,7 +157,9 @@ static void fbcon_drawglyph(uint32_t paint, char c)
 			framebuffer[pixel+1] = (uint8_t)(((b->G * (255 - p)) + (c->G * p)) / 255);
 			framebuffer[pixel+2] = (uint8_t)(((b->B * (255 - p)) + (c->B * p)) / 255);
 #else
-			framebuffer[pixel] = (0xFF << 24) | (bit << 16) & r | (bit << 8) & g | bit & b;
+			framebuffer[pixel] = bg;
+			framebuffer[pixel] &= ~((0xff << 24) | (bit << 16) | (bit << 8) | bit);
+			framebuffer[pixel] |= (bit << 24) | (bit << 16) & r | (bit << 8) & g | bit & b;
 #endif
 		}
 	}
@@ -200,7 +201,7 @@ void fbcon_clear(void)
 }
 
 
-static void fbcon_set_colors(unsigned bg, unsigned fg)
+void fbcon_set_colors(unsigned bg, unsigned fg)
 {
 	BGCOLOR = bg;
 	FGCOLOR = fg;
@@ -293,6 +294,26 @@ void fbcon_setup(struct fbcon_config *_config)
 struct fbcon_config* fbcon_display(void)
 {
     return config;
+}
+
+void fbcon_setpos(int x, int y)
+{
+	cur_pos.x = x;
+	cur_pos.y = y;
+}
+
+void fbcon_bar(int x, int y, int width, int height, int color)
+{
+	int i, j;
+	uint32_t pixel;
+	uint32_t *framebuffer = config->base;
+
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			pixel = ((y + i) * config->width + (x + j));
+			framebuffer[pixel] = color;
+		}
+	}
 }
 
 #endif
