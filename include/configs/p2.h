@@ -43,6 +43,8 @@
 
 #define CONFIG_COSMOPOLITAN      1
 
+#define CONFIG_FBCON             1
+#define CONFIG_LGE_WEB_DOWNLOAD  1
  
 #if defined(CONFIG_BOOT_DEVICE_EMMC)
 #define CFG_ENV_SIZE             SZ_128K    
@@ -152,9 +154,18 @@
 //#define EMMC_INITRD_BASE_SEC		0x00002400
 //#define EMMC_RECOVERY_BASE_SEC		0x00004C00
 
+#ifdef CONFIG_LGE_FOTA_FEATURE
 #define CONFIG_BOOTCOMMAND	"mmcinit 1; mmc 1 loadimage; bootm 81000000\0"
+#else
+#define CONFIG_BOOTCOMMAND	"mmcinit 1; booti mmc1 boot\0"
+//#define CONFIG_BOOTCOMMAND	"mmcinit 1; mmc 1 read 0xc00 0x81000000 0xA00000; booti 0x81000000\0"
+#endif
 
 #endif 
+
+#define CONFIG_OMAP4_ANDROID_CMD_LINE 1
+
+#define CONFIG_CONSOLEARGS " console=ttyO3,115200n8"
 
 #if defined (CONFIG_DDR_1GB)
 #define CONFIG_BOOTARGS "mem=452M@0x80000000 mem=512M@0xA0000000 vmalloc=256M \
