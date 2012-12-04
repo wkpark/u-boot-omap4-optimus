@@ -1,0 +1,235 @@
+#define MUX_DEFAULT_OMAP4() \
+	MV(CP(GPMC_AD0), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD1), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD2), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD3), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD4), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD5), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD6), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD7), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_AD8), IEN | PTD | M0)						\
+	MV(CP(GPMC_AD9), IEN | PTD | M0)						\
+	MV(CP(GPMC_AD10), IEN | PTD | M0)						\
+	MV(CP(GPMC_AD11), IEN | PTD | M0)						\
+	MV(CP(GPMC_AD12), IEN | PTD | M0)						\
+	MV(CP(GPMC_AD13), IEN | PTD | M0)						\
+	MV(CP(GPMC_AD14), IEN | PTD | M0)						\
+	MV(CP(GPMC_AD15), IEN | PTD | M0)						\
+	MV(CP(GPMC_A16), IEN | PTU | M3)						\
+	MV(CP(GPMC_A17), M3)								\
+	MV(CP(GPMC_A18), IEN | OFF_EN | OFF_IN | OFF_PU | M3)				\
+	MV(CP(GPMC_A19), M3)								\
+	MV(CP(GPMC_A20), IEN | PTU | M3)						\
+	MV(CP(GPMC_A21), PTD | M3)							\
+	MV(CP(GPMC_A22), IEN | PTD | M7)						\
+	MV(CP(GPMC_A23), IEN | PTD | M7)						\
+	MV(CP(GPMC_A24), IEN | PTD | M7)						\
+	MV(CP(GPMC_A25), IEN | PTD | M7)						\
+	MV(CP(GPMC_NCS0), M0)								\
+	MV(CP(GPMC_NCS1), IEN | M3)							\
+	MV(CP(GPMC_NCS2), IEN | M3)							\
+	MV(CP(GPMC_NCS3), IEN | PTD | M7)						\
+	MV(CP(GPMC_NWP), IEN | PTD | M7)						\
+	MV(CP(GPMC_CLK), M3)								\
+	MV(CP(GPMC_NADV_ALE), M0)							\
+	MV(CP(GPMC_NOE), IEN | PTU | OFF_EN | M1)					\
+	MV(CP(GPMC_NWE), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M1)			\
+	MV(CP(GPMC_NBE0_CLE), M0)							\
+	MV(CP(GPMC_NBE1), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(GPMC_WAIT0), IEN | PTD | M0)						\
+	MV(CP(GPMC_WAIT1), PTU | M3)							\
+	MV(CP(C2C_DATA11), IEN | PTD | M7)						\
+	MV(CP(C2C_DATA12), IEN | PTD | M7)						\
+	MV(CP(C2C_DATA13), IEN | PTD | M7)						\
+	MV(CP(C2C_DATA14), M3)								\
+	MV(CP(C2C_DATA15), M3)								\
+	MV(CP(HDMI_HPD), IEN | PTD | M3)						\
+	MV(CP(HDMI_CEC), M0)								\
+	MV(CP(HDMI_DDC_SCL), IEN | PTU | M0)						\
+	MV(CP(HDMI_DDC_SDA), IEN | PTU | M0)						\
+	MV(CP(CSI21_DX0), IEN | M0)							\
+	MV(CP(CSI21_DY0), IEN | M0)							\
+	MV(CP(CSI21_DX1), IEN | M0)							\
+	MV(CP(CSI21_DY1), IEN | M0)							\
+	MV(CP(CSI21_DX2), IEN | M0)							\
+	MV(CP(CSI21_DY2), IEN | M0)							\
+	MV(CP(CSI21_DX3), IEN | M0)							\
+	MV(CP(CSI21_DY3), IEN | M0)							\
+	MV(CP(CSI21_DX4), IEN | M0)							\
+	MV(CP(CSI21_DY4), IEN | M0)							\
+	MV(CP(CSI22_DX0), IEN | M0)							\
+	MV(CP(CSI22_DY0), IEN | M0)							\
+	MV(CP(CSI22_DX1), IEN | M0)							\
+	MV(CP(CSI22_DY1), IEN | M0)							\
+	MV(CP(CAM_SHUTTER), IEN | PTD | M7)						\
+	MV(CP(CAM_STROBE), OFF_EN | M3)							\
+	MV(CP(CAM_GLOBALRESET), M3)							\
+	MV(CP(USBB1_ULPITLL_CLK), IEN | PTD | OFF_WE | M1)				\
+	MV(CP(USBB1_ULPITLL_STP), IEN | M1)						\
+	MV(CP(USBB1_ULPITLL_DIR), IEN | M1)						\
+	MV(CP(USBB1_ULPITLL_NXT), OFF_EN | M1)						\
+	MV(CP(USBB1_ULPITLL_DAT0), M1)							\
+	MV(CP(USBB1_ULPITLL_DAT1), M1)							\
+	MV(CP(USBB1_ULPITLL_DAT2), M1)							\
+	MV(CP(USBB1_ULPITLL_DAT3), IEN | M1)						\
+	MV(CP(USBB1_ULPITLL_DAT4), IEN | PTD | M7)					\
+	MV(CP(USBB1_ULPITLL_DAT5), IEN | PTD | M7)					\
+	MV(CP(USBB1_ULPITLL_DAT6), IEN | PTD | M7)					\
+	MV(CP(USBB1_ULPITLL_DAT7), IEN | PTD | M7)					\
+	MV(CP(USBB1_HSIC_DATA), M7)							\
+	MV(CP(USBB1_HSIC_STROBE), M7)							\
+	MV(CP(USBC1_ICUSB_DP), PTD | OFF_EN | OFF_PD | M3)				\
+	MV(CP(USBC1_ICUSB_DM), OFF_EN | M3)						\
+	MV(CP(SDMMC1_CLK), PTU | OFF_EN | M0)						\
+	MV(CP(SDMMC1_CMD), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC1_DAT0), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC1_DAT1), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC1_DAT2), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC1_DAT3), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC1_DAT4), IEN | PTD | M7)						\
+	MV(CP(SDMMC1_DAT5), IEN | PTD | M7)						\
+	MV(CP(SDMMC1_DAT6), IEN | PTD | M7)						\
+	MV(CP(SDMMC1_DAT7), IEN | PTD | M7)						\
+	MV(CP(ABE_MCBSP2_CLKX), IEN | OFF_EN | OFF_IN | OFF_PD | M0)			\
+	MV(CP(ABE_MCBSP2_DR), IEN | OFF_EN | M0)					\
+	MV(CP(ABE_MCBSP2_DX), OFF_EN | M0)						\
+	MV(CP(ABE_MCBSP2_FSX), IEN | OFF_EN | OFF_IN | OFF_PD | M0)			\
+	MV(CP(ABE_MCBSP1_CLKX), IEN | OFF_EN | OFF_IN | OFF_PD | M0)			\
+	MV(CP(ABE_MCBSP1_DR), IEN | OFF_EN | M0)					\
+	MV(CP(ABE_MCBSP1_DX), OFF_EN | M0)						\
+	MV(CP(ABE_MCBSP1_FSX), IEN | OFF_EN | OFF_IN | OFF_PD | M0)			\
+	MV(CP(ABE_PDM_UL_DATA), IEN | M0)						\
+	MV(CP(ABE_PDM_DL_DATA), IEN | PTD | M0)						\
+	MV(CP(ABE_PDM_FRAME), IEN | PTU | M0)						\
+	MV(CP(ABE_PDM_LB_CLK), IEN | PTD | M0)						\
+	MV(CP(ABE_CLKS), IEN | PTD | M0)						\
+	MV(CP(ABE_DMIC_CLK1), IEN | PTD | OFF_WE | M3)					\
+	MV(CP(ABE_DMIC_DIN1), IEN | PTD | OFF_WE | M3)					\
+	MV(CP(ABE_DMIC_DIN2), PTU | OFF_EN | M3)					\
+	MV(CP(ABE_DMIC_DIN3), IEN | PTD | OFF_WE | M3)					\
+	MV(CP(UART2_CTS), IEN | PTU | M0)						\
+	MV(CP(UART2_RTS), M0)								\
+	MV(CP(UART2_RX), IEN | PTU | M0)						\
+	MV(CP(UART2_TX), M0)								\
+	MV(CP(HDQ_SIO), M3)								\
+	MV(CP(I2C1_SCL), IEN | PTU | M0)						\
+	MV(CP(I2C1_SDA), IEN | PTU | M0)						\
+	MV(CP(I2C2_SCL), IEN | PTU | M0)						\
+	MV(CP(I2C2_SDA), IEN | PTU | M0)						\
+	MV(CP(I2C3_SCL), IEN | PTU | M0)						\
+	MV(CP(I2C3_SDA), IEN | PTU | M0)						\
+	MV(CP(I2C4_SCL), IEN | PTU | M0)						\
+	MV(CP(I2C4_SDA), IEN | PTU | M0)						\
+	MV(CP(MCSPI1_CLK), IEN | PTD | M0)						\
+	MV(CP(MCSPI1_SOMI), IEN | PTD | M0)						\
+	MV(CP(MCSPI1_SIMO), IEN | PTD | M0)						\
+	MV(CP(MCSPI1_CS0), IEN | PTD | M0)						\
+	MV(CP(MCSPI1_CS1), IEN | PTU | OFF_WE | M1)					\
+	MV(CP(MCSPI1_CS2), IEN | PTD | M7)						\
+	MV(CP(MCSPI1_CS3), M3)								\
+	MV(CP(UART3_CTS_RCTX), M1)							\
+	MV(CP(UART3_RTS_SD), IEN | PTD | M7)						\
+	MV(CP(UART3_RX_IRRX), M1)							\
+	MV(CP(UART3_TX_IRTX), M3)							\
+	MV(CP(SDMMC5_CLK), IEN | PTU | OFF_EN | M0)					\
+	MV(CP(SDMMC5_CMD), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC5_DAT0), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC5_DAT1), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC5_DAT2), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(SDMMC5_DAT3), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | M0)			\
+	MV(CP(MCSPI4_CLK), IEN | PTD | M7)						\
+	MV(CP(MCSPI4_SIMO), IEN | PTD | M7)						\
+	MV(CP(MCSPI4_SOMI), IEN | PTD | M7)						\
+	MV(CP(MCSPI4_CS0), IEN | PTD | M7)						\
+	MV(CP(UART4_RX), IEN | PTU | M0)						\
+	MV(CP(UART4_TX), M0)								\
+	MV(CP(USBB2_ULPITLL_CLK), IEN | PTU | M3)					\
+	MV(CP(USBB2_ULPITLL_STP), IEN | PTD | M7)					\
+	MV(CP(USBB2_ULPITLL_DIR), IEN | PTD | M7)					\
+	MV(CP(USBB2_ULPITLL_NXT), IEN | PTD | M7)					\
+	MV(CP(USBB2_ULPITLL_DAT0), IEN | PTD | M7)					\
+	MV(CP(USBB2_ULPITLL_DAT1), IEN | PTD | M7)					\
+	MV(CP(USBB2_ULPITLL_DAT2), IEN | PTU | M3)					\
+	MV(CP(USBB2_ULPITLL_DAT3), M3)							\
+	MV(CP(USBB2_ULPITLL_DAT4), PTD | M3)						\
+	MV(CP(USBB2_ULPITLL_DAT5), PTD | M3)						\
+	MV(CP(USBB2_ULPITLL_DAT6), IEN | OFF_WE | M3)					\
+	MV(CP(USBB2_ULPITLL_DAT7), M3)							\
+	MV(CP(USBB2_HSIC_DATA), M7)							\
+	MV(CP(USBB2_HSIC_STROBE), M7)							\
+	MV(CP(UNIPRO_TX0), OFF_IN | OFF_PD | M1)					\
+	MV(CP(UNIPRO_TY0), OFF_IN | OFF_PD | M1)					\
+	MV(CP(UNIPRO_TX1), IEN | PTD | M7)						\
+	MV(CP(UNIPRO_TY1), IEN | PTD | M7)						\
+	MV(CP(UNIPRO_TX2), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(UNIPRO_TY2), M3)								\
+	MV(CP(UNIPRO_RX0), IEN | PTU | OFF_IN | OFF_PD | M1)				\
+	MV(CP(UNIPRO_RY0), IEN | PTU | OFF_IN | OFF_PD | M1)				\
+	MV(CP(UNIPRO_RX1), IEN | PTD | M7)						\
+	MV(CP(UNIPRO_RY1), IEN | PTD | M7)						\
+	MV(CP(UNIPRO_RX2), IEN | PTD | M7)						\
+	MV(CP(UNIPRO_RY2), IEN | PTD | M7)						\
+	MV(CP(USBA0_OTG_CE), PTD | M0)							\
+	MV(CP(USBA0_OTG_DP), M0)							\
+	MV(CP(USBA0_OTG_DM), M0)							\
+	MV(CP(FREF_CLK1_OUT), PTD | M7)							\
+	MV(CP(FREF_CLK2_OUT), IEN | PTD | M7)						\
+	MV(CP(SYS_NIRQ1), IEN | PTU | OFF_WE | M0)					\
+	MV(CP(SYS_NIRQ2), IEN | PTU | OFF_WE | M0)					\
+	MV(CP(SYS_BOOT0), M7)								\
+	MV(CP(SYS_BOOT1), IEN | M3)							\
+	MV(CP(SYS_BOOT2), IEN | M3)							\
+	MV(CP(SYS_BOOT3), M7)								\
+	MV(CP(SYS_BOOT4), IEN | M3)							\
+	MV(CP(SYS_BOOT5), M7)								\
+	MV(CP(DPM_EMU0), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(DPM_EMU1), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(DPM_EMU2), IEN | PTD | M3)						\
+	MV(CP(DPM_EMU3), PTU | M3)							\
+	MV(CP(DPM_EMU4), M3)								\
+	MV(CP(DPM_EMU5), IEN | OFF_WE | M3)						\
+	MV(CP(DPM_EMU6), M2)								\
+	MV(CP(DPM_EMU7), IEN | M2)							\
+	MV(CP(DPM_EMU8), M2)								\
+	MV(CP(DPM_EMU9), IEN | PTD | M2)						\
+	MV(CP(DPM_EMU10), IEN | PTU | OFF_EN | OFF_IN | OFF_PU | OFF_WE | M3)		\
+	MV(CP(DPM_EMU11), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(DPM_EMU12), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(DPM_EMU13), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(DPM_EMU14), PTD | OFF_EN | OFF_PD | M3)					\
+	MV(CP(DPM_EMU15), IEN | PTD | OFF_WE | M3)					\
+	MV(CP(DPM_EMU16), OFF_EN | M3)							\
+	MV(CP(DPM_EMU17), IEN | PTD | M3)						\
+	MV(CP(DPM_EMU18), M1)								\
+	MV(CP(DPM_EMU19), PTD | M3)							\
+	MV(CP(CSI22_DX2), M0)								\
+	MV(CP(CSI22_DY2), M0)								\
+	MV1(WK(PAD0_SIM_IO), M7)							\
+	MV1(WK(PAD1_SIM_CLK), M7)							\
+	MV1(WK(PAD0_SIM_RESET), M7)							\
+	MV1(WK(PAD1_SIM_CD), PTD | M3)							\
+	MV1(WK(PAD0_SIM_PWRCTRL), M7)							\
+	MV1(WK(PAD1_SR_SCL), IEN | PTU | M0)						\
+	MV1(WK(PAD0_SR_SDA), IEN | PTU | M0)						\
+	MV1(WK(PAD1_FREF_XTAL_IN), M7)							\
+	MV1(WK(PAD0_FREF_SLICER_IN), M0)						\
+	MV1(WK(PAD1_FREF_CLK_IOREQ), M0)						\
+	MV1(WK(PAD0_FREF_CLK0_OUT), M3)							\
+	MV1(WK(PAD1_FREF_CLK3_REQ), PTD | M3)						\
+	MV1(WK(PAD0_FREF_CLK3_OUT), M0)							\
+	MV1(WK(PAD1_FREF_CLK4_REQ), IEN | M3)						\
+	MV1(WK(PAD0_FREF_CLK4_OUT), M0)							\
+	MV1(WK(PAD1_SYS_32K), IEN | M0)							\
+	MV1(WK(PAD0_SYS_NRESPWRON), M0)							\
+	MV1(WK(PAD1_SYS_NRESWARM), M0)							\
+	MV1(WK(PAD0_SYS_PWR_REQ), PTU | M0)						\
+	MV1(WK(PAD1_SYS_PWRON_RESET), IEN | PTU | M3)					\
+	MV1(WK(PAD0_SYS_BOOT6), M7)							\
+	MV1(WK(PAD1_SYS_BOOT7), IEN | M3)						\
+	MV1(WK(PAD0_JTAG_NTRST), IEN | PTD | M0)					\
+	/* MV1(WK(0x4A31E06E ), IEN | PTD | M0) */					\
+	MV1(WK(PAD0_JTAG_RTCK), PTD | M0)						\
+	MV1(WK(PAD1_JTAG_TMS_TMSC), IEN | M0)						\
+	MV1(WK(PAD0_JTAG_TDI), IEN | PTU | M0)						\
+	MV1(WK(PAD1_JTAG_TDO), IEN | PTU | M0)						\
+
