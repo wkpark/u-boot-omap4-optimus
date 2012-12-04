@@ -811,6 +811,7 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 			__raw_writel(0xfff, PRM_RSTST);
 
 			udelay (1000000); /* 1 sec */
+			strcpy(PUBLIC_SAR_RAM_1_FREE, "bootloader");
 
 			/* now warm reset the silicon */
 			__raw_writel(PRM_RSTCTRL_RESET_WARM_BIT,
