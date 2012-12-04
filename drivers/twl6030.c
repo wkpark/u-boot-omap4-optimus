@@ -698,6 +698,31 @@ int charger_fsm(const int charger_type)
 					}
 				}
 			}
+#else
+			u8 vbat_low;
+
+			select_bus(I2C1, OMAP_I2C_STANDARD);
+			twl6030_i2c_read_u8(TWL6030_CHIP_PM, &vbat_low, PH_CFG_VBATLOW);
+			D("PH_CFG_VBATLOW: %x", vbat_low);
+			{
+				char tmp[100];
+				sprintf(tmp, "vbat_low=%x vbbat=%d\n", vbat_low, vbbat);
+				fbcon_puts(tmp);
+			}
+
+			twl6030_set_battery_bounce_setting();
+
+			if (vbbat > 2200) {
+				if ((vbat_low & BB_SEL) && (start_reason & RESTART_BB) && !(hw_cond & STS_PLUG_DET)) {
+					D("GOING TO KERNEL:: SMPL booting...");
+					goto GOTO_KERNEL;
+				}
+
+				if ((start_reason & STRT_ON_PWRON) && !(hw_cond & STS_PLUG_DET)) {
+					D("GOING TO KERNEL:: SMPL booting...");
+					goto GOTO_KERNEL;
+				}
+			}
 #endif /* CONFIG_LGE_NVDATA */
 
 			if( ( 2 == *(volatile unsigned int*)(SCRM_APEWARMRSTST)) || reset_flag != 0)
@@ -726,6 +751,16 @@ int charger_fsm(const int charger_type)
 		}
 
 POWER_OFF:
+		{
+			char tmp[100];
+			start_vib();
+			sprintf(tmp, "_hw_c=%x _sr=%d _scrm=%x\n", hw_cond, start_reason,
+				*(volatile unsigned int*)(SCRM_APEWARMRSTST));
+			fbcon_puts(tmp);
+		}
+		fbcon_puts("Power_OFF...\n");
+		udelay(5000000); /* 5 sec */
+
 		charging_mode = chr_ic_deactivation();
 		D("GOING TO power_off :: charging_mode = %d, reboot cause: %d", charging_mode, *(volatile unsigned int*)(SCRM_APEWARMRSTST));
 		D("power off.. charging_mode = %d", charging_mode);
@@ -738,11 +773,45 @@ FSM_LOOP:
 		continue;
 
 GOTO_KERNEL:
+#ifdef CONFIG_LGE_P2
+		if ( (reset_flag && !start_reason) || (2 == *(volatile unsigned int*)(PRM_RSTST))
+			|| !(hw_cond & STS_PWRON) || (start_reason & STRT_ON_PWRON) )
+		{
+			off_mode_st = 0x20;
+		} else if (hw_cond & STS_PLUG_DET) {
+			/* "on charger" support */
+			off_mode_st = 0x40;
+		} else if (!(start_reason & STRT_ON_PWRON)) {
+			char tmp[100];
+			sprintf(tmp, "_hw_c=%x _sr=%d _scrm=%x\n", hw_cond, start_reason,
+				*(volatile unsigned int*)(SCRM_APEWARMRSTST));
+			fbcon_puts(tmp);
+			fbcon_puts(" Power_OFF...\n");
+			udelay(5000000); /* 5 sec */
+		}
+#else
 		if( ( reset_flag && ( !start_reason || ( 2 == *(volatile unsigned int*)(SCRM_APEWARMRSTST)) ) ) \
 			|| !(hw_cond & STS_PWRON) || (start_reason & STRT_ON_PWRON) || !(hw_cond & STS_PLUG_DET) )
 		{
 			off_mode_st = 0x20;
+#if defined (CONFIG_LGE_CX2)
+		} else if (hw_cond & STS_PLUG_DET) {
+			/* "on charger" support */
+			off_mode_st = 0x40;
+#endif
 		}
+#endif
+#if 1
+		{
+			char cond[100];
+			unsigned int warmboot = *(volatile unsigned int *)(PRM_RSTST);
+			sprintf(cond, "_hw_c=%x _sr=%d _warm=%x _scrm=%x", hw_cond, start_reason,
+				warmboot,
+				*(volatile unsigned int*)(SCRM_APEWARMRSTST));
+			sprintf(cmd_line, "%s %s", getenv("bootargs"), cond);
+			setenv("bootargs", cmd_line);
+		}
+#endif
 
 		sprintf(cmd_line, "%s chg=%d", getenv("bootargs"), charger_type | off_mode_st);
 		setenv("bootargs", cmd_line);
