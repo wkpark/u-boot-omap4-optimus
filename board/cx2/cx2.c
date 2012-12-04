@@ -249,7 +249,8 @@ int trap_exit_key(void)
 #elif defined (CONFIG_CX2_REV_D)
 #include "mux_rev_d.c"
 #elif defined (CONFIG_CX2_REV_10)
-#include "mux_rev_1.0.c"
+#include "mux_su870.h"
+//#include "mux_rev_1.0.c"
 #endif
 
 void set_muxconf_regs(void)
