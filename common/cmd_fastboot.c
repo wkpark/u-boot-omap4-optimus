@@ -1379,10 +1379,15 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	/* Initialize the board specific support */
 	if (0 == fastboot_init(&interface))
 	{
+		char ver[20];
 		printf ("Disconnect USB cable to finish fastboot..\n");
 		
 		/* If we got this far, we are a success */
 		ret = 0;
+#if defined (CONFIG_FBCON)
+		sprintf(ver, "\n fastboot v%s\n\n", FASTBOOT_VERSION);
+		fbcon_puts(ver);
+#endif
 
 		/* On disconnect or error, polling returns non zero */
 		while (1)
