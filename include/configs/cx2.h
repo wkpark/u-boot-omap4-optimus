@@ -8,6 +8,8 @@
 #define CONFIG_4430SDP		1    
 #define CONFIG_FASTBOOT		1    
 
+#define BOARD_LATE_INIT		1
+
 #define CONFIG_COSMO            1
 
 #define CONFIG_COSMO_BOOT_IMG	1
@@ -40,6 +42,7 @@
 
 #define CONFIG_COSMOPOLITAN      1
 
+#define CONFIG_FBCON             1
 #define CONFIG_LGE_WEB_DOWNLOAD  1
 //#define CONFIG_LGE_FOTA_FEATURE  1
 #define CONFIG_LGE_NVDATA        1
@@ -155,17 +158,32 @@
 #ifdef CONFIG_LGE_FOTA_FEATURE
 #define CONFIG_BOOTCOMMAND	"mmcinit 1; mmc 1 loadimage; bootm 81000000\0"
 #else
-#define CONFIG_BOOTCOMMAND	"mmcinit 1; booti mmc1 boot\0"
+#define CONFIG_BOOTCOMMAND	"mmcinit 1; booti mmc1 kernel\0"
 #endif
 
 #endif 
 
+#define CONFIG_OMAP4_ANDROID_CMD_LINE 1
+
+#define CONFIG_CONSOLEARGS " console=ttyO3,115200n8"
+
+#if 0
+/* GingerBread */
 #if defined (CONFIG_DDR_1GB)
 #define CONFIG_BOOTARGS "mem=463M@0x80000000 mem=512M@0xA0000000 vmalloc=180m \
 init=/init vram=10M omapfb.vram=\"0:4M\""
 #else
 #define CONFIG_BOOTARGS "root=/dev/ram0 rw mem=463M@0x80000000\
 init=/init vram=10M,0x87000000 omapfb.vram=\"0:3000K@0x87000000\""
+#endif
+#else
+#if defined (CONFIG_DDR_1GB)
+#define CONFIG_BOOTARGS "mem=452M@0x80000000 mem=512M@0xA0000000 vmalloc=450M \
+init=/init vram=20M,0x87000000 omapfb.vram=\"0:4M@0x87000000\""
+#else
+#define CONFIG_BOOTARGS "root=/dev/ram0 rw mem=463M@0x80000000\
+init=/init vram=10M,0x87000000 omapfb.vram=\"0:3000K@0x87000000\""
+#endif
 #endif
 
 #define CONFIG_NETMASK           255.255.254.0
