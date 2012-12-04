@@ -773,35 +773,90 @@ void start_armboot (void)
 
 	extern int	recoverykey(void); 
 	int i;
-	if(recoverykey() || isFactoryReset || isHardReset) {
-		printf("\n### ==============fota mode ==============###\n"); 
-#if defined (CONFIG_LGE_P2)
-		setenv("bootcmd", "mmcinit 1; mmc 1 read 0x3c00 0x81000000 0xA00000; booti 0x81000000");
-#elif defined (CONFIG_LGE_CX2)
-#if defined (CONFIG_CX2_SU870)
-		setenv("bootcmd", "mmcinit 1; mmc 1 read 0x5800 0x81000000 0xA00000; bootm 81000000");
-#else
-		setenv("bootcmd", "mmcinit 1; mmc 1 read 0x8000 0x81000000 0xA00000; bootm 81000000");
-#endif /* CONFIG_CX2_SU870 */
-#else /* CONFIG_LGE_CX2 */
-		setenv("bootcmd", "mmcinit 1; mmc 1 read 0x5800 0x81000000 0xA00000; bootm 81000000");
+	int selected_menu = 0;
+#define MENU_NORMAL	0
+#define MENU_FASTBOOT	1
+#define MENU_RECOVERY	2
+#define MENU_DOWNLOAD	3
+
+	if (recoverykey()) {
+		extern int do_keyscan(int);
+#define KEY_VOLUP	1
+#define KEY_VOLDOWN	2
+		selected_menu = MENU_RECOVERY; /* default */
+
+		/* XXX */
+		__raw_writel(2, PRM_RSTST);
+#ifdef CONFIG_FBCON
+		char *menu[] = {
+			" - Normal      \n",
+			" - Fastboot    \n",
+			" - Recovery    \n",
+			NULL,
+		};
+		int item;
+		int bg = 0xff000000;
+		int fg = 0xff33ccff;
+		int bar = 0xaa33ccff;
+
+		item = selected_menu;
+		default_logo();
+
+		for (i = 0; i < 300; i++) {
+			int j;
+			int key;
+			if (i % 15 == 0) {
+				key = do_keyscan(2);
+				if (key) {
+					if (key & KEY_VOLDOWN) {
+						item++;
+					} else if (key & KEY_VOLUP) {
+						item--;
+					}
+					if (item < MENU_NORMAL) {
+						item = MENU_NORMAL;
+					} else if (item > MENU_RECOVERY) {
+						item = MENU_RECOVERY;
+					}
+				}
+				for (j = 0; menu[j] != NULL; j++) {
+					fbcon_setpos(2, 2 + j);
+					if (j == item) {
+						fbcon_set_colors(fg, bg);
+					} else {
+						fbcon_set_colors(bg, fg);
+					}
+					fbcon_puts(menu[j]);
+				}
+			}
+			// progressbar
+			fbcon_bar(40, fb_cfg.height - 80, i+100, 3, bar);
+			udelay(10000);
+		}
+
+		fbcon_set_colors(bg, fg); /* normal color */
+		fbcon_clear();
+		fbcon_puts(" Please wait for seconds...\n");
+		if (item == MENU_FASTBOOT) {
+			fbcon_puts("     Please connect USB cable...\n");
+			udelay(3000000);
+		}
+
+		/* reset */
+		fbcon_setup(&fb_cfg);
+
+		selected_menu = item;
 #endif
-#if defined (CONFIG_DDR_1GB)
-		setenv("bootargs", "mem=463M@0x80000000 mem=512M@0xA0000000 vmalloc=180m console=ttyO3,115200n8 init=/init vram=10M omapfb.vram=\"0:4M\"");
-#else
-		setenv("bootargs", "root=/dev/ram0 rw mem=463M@0x80000000 console=ttyO3,115200n8 init=/init vram=10M omapfb.vram=\"0:4M\"");
-#endif
-		printf("\n### ==============fota mode ==============###\n");
 	}
 
-#endif
-
-#if 0
-	/* for recovery */
-	setenv("bootcmd", "mmcinit 1; mmc 1 read 0x3c00 0x81000000 0xA00000; bootm 0x81000000");
-	setenv("bootargs",
-		"mem=452M@0x80000000 mem=512M@0xA0000000 vmalloc=256M console=ttyO3,115200n8 "
-		"init=/init vram=10M,0x87000000 omapfb.vram=\"0:4M@0x87000000\"");
+	if (selected_menu == MENU_RECOVERY || isFactoryReset || isHardReset) {
+		printf("\n### ==============fota mode ==============###\n");
+		setenv("bootcmd", "mmcinit 1; booti mmc1 recovery");
+		setenv("bootargs", CONFIG_BOOTARGS CONFIG_CONSOLEARGS);
+		printf("\n### ==============fota mode ==============###\n");
+	} else if (selected_menu == MENU_FASTBOOT) {
+		setenv("bootcmd", "fastboot");
+	}
 #endif
 
 	extern int muic_init(int);
@@ -856,8 +911,13 @@ void start_armboot (void)
 		web_download_mode = 0;
 	}
 #endif
+	{
+		char muic[100];
+		sprintf(muic, "muic mode=%d\n", muic_mode);
+		fbcon_puts(muic);
+	}
 
-	if( muic_mode != 1 )
+	if( muic_mode != 1 && !selected_menu)
 	{
 #ifdef CONFIG_COSMO_SU760
 		lge_static_nvdata_emmc_read(LGE_NVDATA_STATIC_SECOND,&down,1);
@@ -951,6 +1011,8 @@ void start_armboot (void)
 			if(usb !=1)
 				for (;;);
 		}
+#else
+		{}
 #endif
 	}
 
@@ -1182,6 +1244,28 @@ void download_logo(int download_mode)
 
 	dispc_enable_lcd_out(1);
 
+}
+
+int default_logo(void)
+{
+	enable_interrupts ();
+
+	init_panel(0);
+
+	cosmo_panel_logo_draw();
+
+	configure_dispc();
+
+	u8 buf = DCS_DISPLAY_ON;
+	dsi_vc_dcs_write(1,TCH, &buf, 1);
+	printf("DISPLAY ON\n");
+
+	dsi_enable_video_mode();
+	dispc_go(OMAP_DSS_CHANNEL_LCD2);
+
+	dispc_enable_lcd_out(1);
+
+	return 0;
 }
 
 #ifdef CONFIG_MODEM_SUPPORT
