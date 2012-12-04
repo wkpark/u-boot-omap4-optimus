@@ -1945,6 +1945,18 @@ cosmo_su760_rev_d_mipi_config :    unconfig
 	@./mkconfig -a cosmopolitan arm omap4 cosmopolitan
 #LGE_CHANGE_DOMASTIC - end
 # LGE_CHANGE [MIPI-HSI] jaesung.woo@lge.com [END]
+#
+cosmo_p920_rev_d_config \
+cosmo_p920_rev_d_mipi_config :    unconfig
+	@if [ "$(findstring p920, $@)" ] ; then \
+		echo "#define CONFIG_COSMO_REV_11 1" >> ./include/config.h ;\
+		echo "#define CONFIG_COSMO_P920 1" >> ./include/config.h ;\
+		echo "#define CONFIG_COSMO_SU760 1" >> ./include/config.h ;\
+	fi;
+	@if [ "$(findstring _d_mipi, $@)" ] ; then \
+		echo "#define CONFIG_COSMO_MIPI_HSI 1" >> ./include/config.h ;\
+	fi;
+	@./mkconfig -a cosmopolitan arm omap4 cosmopolitan
 
 cx2_evb_config \
 cx2_evb_mipi_config :    unconfig
@@ -2039,6 +2051,8 @@ cx2_su870_rev_b_mipi_config : unconfig
 	@./mkconfig -a cx2 arm omap4 cx2
 
 p2_config \
+p2_mipi_config \
+p2_default_mipi_config \
 p2_default_config : unconfig
 	@if [ "$(findstring p2, $@)" ] ; then \
 		echo "#define CONFIG_P2_REV_A 1" >> ./include/config.h ;\
@@ -2050,8 +2064,10 @@ p2_default_config : unconfig
 	@./mkconfig -a p2 arm omap4 p2
 
 p940_config \
+p940_mipi_config \
 p2_rev_b_config \
-p940_default_config : unconfig
+p2_rev_b_mipi_config \
+p940_default_mipi_config : unconfig
 	@if [ "$(findstring p2, $@)" ] ; then \
 		echo "#define CONFIG_P2_REV_B 1" >> ./include/config.h ;\
 		echo "#define CONFIG_P2_P940 1" >> ./include/config.h ;\
