@@ -232,8 +232,11 @@ int trap_exit_key(void)
 #include "mux_su760_rev_a_mipi_hsi.c"
 #elif defined (CONFIG_COSMO_REV_D) && defined(CONFIG_COSMO_SU760) && defined(CONFIG_COSMO_MIPI_HSI)
 #include "mux_su760_rev_b_mipi_hsi.c"
+#elif defined (CONFIG_COSMO_REV_11) && defined(CONFIG_COSMO_P920) && defined(CONFIG_COSMO_MIPI_HSI)
+#include "mux_p920.h"
 #elif defined (CONFIG_COSMO_REV_11) && defined(CONFIG_COSMO_SU760) && defined(CONFIG_COSMO_MIPI_HSI)
-#include "mux_su760_rev_d_mipi_hsi.c"
+//#include "mux_su760_rev_d_mipi_hsi.c"
+#include "mux_su760.h"
 #elif defined(CONFIG_COSMO_REV_C) && defined(CONFIG_COSMO_SU760)
 
 #include "mux_su760_rev_a.c"
