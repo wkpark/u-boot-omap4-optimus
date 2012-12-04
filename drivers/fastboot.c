@@ -1139,6 +1139,8 @@ int fastboot_init(struct cmd_fastboot_interface *interface)
 	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "LG P2";
 #elif defined(CONFIG_LGE_CX2)
 	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "LG CX2";
+#elif defined(CONFIG_COSMO)
+	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "LG COSMO";
 #else
 	device_strings[DEVICE_STRING_PRODUCT_INDEX]       = "SDP4";
 #endif
