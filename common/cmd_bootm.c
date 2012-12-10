@@ -1352,7 +1352,53 @@ int do_booti (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			goto fail;
 		}
 		if (memcmp(hdr->magic, BOOT_MAGIC, 8)) {
-			printf("booti: bad boot image magic\n");
+			char *local_args[2];
+			char str[16];
+			int ret;
+			ulong len = 0;
+
+			image_header_t *mhdr = (void*) boothdr;
+
+			if (ntohl(mhdr->ih_magic) != IH_MAGIC) {
+				puts ("   Bad Magic Number\n");
+				goto fail;
+			}
+			if (mhdr->ih_type != IH_TYPE_MULTI) {
+				puts ("   Only Multi-File supported!\n");
+				goto fail;
+			} else {
+				int i;
+				ulong *len_ptr;
+				char tmp[100];
+
+				len_ptr = (ulong *)((ulong) boothdr + sizeof(image_header_t));
+				for (i = 0; len_ptr[i]; ++i) {
+					len += ntohl(len_ptr[i]);
+				}
+
+				len += sizeof(image_header_t) + sizeof(ulong) * i;
+
+				sprintf(tmp, "booti: mmc_read 0x%x\n", len);
+				fbcon_puts(tmp);
+			}
+			printf("booti: try to read mmc and boot using bootm\n");
+
+			mmc_read(mmcc, pte->start, (unsigned char *) 0x81000000, len); /* FIXME */
+
+			sprintf(str, "%x", 0x81000000);
+			local_args[0] = argv[0];
+			local_args[1] = str;
+
+			printf("booti: bootm...\n");
+			ret = do_bootm(cmdtp, 0, 2, local_args);
+			udelay(5000000); /* 5 sec */
+
+			if (!ret) {
+				puts ("booti: Control returned to monitor - resetting...\n");
+				do_reset (cmdtp, flag, argc, argv);
+				return 1;
+			}
+
 			goto fail;
 		}
 
