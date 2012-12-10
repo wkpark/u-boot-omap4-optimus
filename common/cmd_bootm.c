@@ -1339,6 +1339,9 @@ int do_booti (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		unsigned sector;
 
 		pte = fastboot_flash_find_ptn(ptn);
+		if (!pte && !strcmp(ptn, "boot")) /* retry with "kernel" partition for old GB */
+			pte = fastboot_flash_find_ptn("kernel");
+
 		if (!pte) {
 			printf("booti: cannot find '%s' partition\n", ptn);
 			goto fail;
