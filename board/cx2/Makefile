@@ -34,13 +34,25 @@ SOBJS	:= lowlevel_init.o
 $(LIB):	$(OBJS) $(SOBJS)
 	$(AR) crv $@ $^
 
-lglogo.o:
+lglogo.rle: ../p2/lglogo.rle
+	@rm -f lglogo.o
+	ln -s ../p2/lglogo.rle lglogo.rle
+
+web_download.rle: ../p2/web_download.rle
+	@rm -f web_download.o
+	ln -s ../p2/web_download.rle web_download.rle
+
+web_download_eng.rle: ../p2/web_download_eng.rle
+	@rm -f web_download_eng.o
+	ln -s ../p2/web_download_eng.rle web_download_eng.rle
+
+lglogo.o: lglogo.rle
 	$(OBJCOPY) -I binary -O elf32-littlearm -B arm --redefine-sym _binary_$(patsubst %.o,%_rle_start,$@)=$(patsubst %.o,%,$@) $(patsubst %.o,%.rle,$@) $@
 
-web_download.o:
+web_download.o: web_download.rle
 	$(OBJCOPY) -I binary -O elf32-littlearm -B arm --redefine-sym _binary_$(patsubst %.o,%_rle_start,$@)=$(patsubst %.o,%,$@) $(patsubst %.o,%.rle,$@) $@
 
-web_download_eng.o:
+web_download_eng.o: web_download_eng.rle
 	$(OBJCOPY) -I binary -O elf32-littlearm -B arm --redefine-sym _binary_$(patsubst %.o,%_rle_start,$@)=$(patsubst %.o,%,$@) $(patsubst %.o,%.rle,$@) $@
 
 clean:
@@ -48,6 +60,7 @@ clean:
 
 distclean:	clean
 	rm -f $(LIB) core *.bak .depend
+	rm -f lglogo.rle web_dowload.rle web_download_eng.rle
 
 #########################################################################
 
