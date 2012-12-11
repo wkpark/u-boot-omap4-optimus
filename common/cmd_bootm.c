@@ -158,7 +158,7 @@ int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	char	*name, *s;
 	int	(*appl)(int, char *[]);
 	image_header_t *hdr = &header;
-	char buff[128];
+	char buff[256];
 
 	s = getenv ("verify");
 	verify = (s && (*s == 'n')) ? 0 : 1;
