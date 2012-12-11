@@ -773,7 +773,7 @@ FSM_LOOP:
 		continue;
 
 GOTO_KERNEL:
-#ifdef CONFIG_LGE_P2
+#if defined(CONFIG_LGE_P2) || defined(CONFIG_COSMO_SU760)
 		if ( (reset_flag && !start_reason) || (2 == *(volatile unsigned int*)(PRM_RSTST))
 			|| !(hw_cond & STS_PWRON) || (start_reason & STRT_ON_PWRON) )
 		{
